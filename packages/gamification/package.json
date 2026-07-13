@@ -4,12 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "tsup",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "exports": {
-    ".": "./src/index.ts",
-    "./schema": "./src/schema/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./schema": {
+      "types": "./dist/schema/index.d.ts",
+      "default": "./dist/schema/index.js"
+    }
   },
   "dependencies": {
     "@heybray/identity": "^0.0.1",
@@ -23,5 +30,10 @@
     "@types/express": "^4.17.21",
     "@types/node": "^20.16.11",
     "typescript": "^5.6.3"
-  }
+  },
+  "license": "AGPL-3.0-only",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ]
 }

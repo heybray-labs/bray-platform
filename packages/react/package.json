@@ -3,20 +3,52 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
+  "license": "AGPL-3.0-only",
   "scripts": {
+    "build": "tsup",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "exports": {
-    "./lib/*": "./src/lib/*.ts",
-    "./hooks/*": "./src/hooks/*.ts",
-    "./components/*": "./src/components/*.tsx",
-    "./admin/*": "./src/admin/*.tsx",
-    "./pages/*": "./src/pages/*.tsx",
-    "./classifications/*": "./src/classifications/*.tsx",
-    "./config": "./src/config/app-config.tsx",
-    "./errors": "./src/errors/index.ts",
-    "./extensions/*": "./src/extensions/*.ts"
+    "./lib/*": {
+      "types": "./dist/lib/*.d.ts",
+      "default": "./dist/lib/*.js"
+    },
+    "./hooks/*": {
+      "types": "./dist/hooks/*.d.ts",
+      "default": "./dist/hooks/*.js"
+    },
+    "./components/*": {
+      "types": "./dist/components/*.d.ts",
+      "default": "./dist/components/*.js"
+    },
+    "./admin/*": {
+      "types": "./dist/admin/*.d.ts",
+      "default": "./dist/admin/*.js"
+    },
+    "./pages/*": {
+      "types": "./dist/pages/*.d.ts",
+      "default": "./dist/pages/*.js"
+    },
+    "./classifications/*": {
+      "types": "./dist/classifications/*.d.ts",
+      "default": "./dist/classifications/*.js"
+    },
+    "./config": {
+      "types": "./dist/config/app-config.d.ts",
+      "default": "./dist/config/app-config.js"
+    },
+    "./errors": {
+      "types": "./dist/errors/index.d.ts",
+      "default": "./dist/errors/index.js"
+    },
+    "./extensions/*": {
+      "types": "./dist/extensions/*.d.ts",
+      "default": "./dist/extensions/*.js"
+    }
   },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",

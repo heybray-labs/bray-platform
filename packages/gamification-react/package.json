@@ -3,21 +3,58 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
+  "license": "AGPL-3.0-only",
   "scripts": {
+    "build": "tsup",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./points/*": "./src/points/*.tsx",
-    "./teams/*": "./src/teams/*.tsx",
-    "./teams/star-map-types": "./src/teams/star-map-types.ts",
-    "./teams/star-map-utils": "./src/teams/star-map-utils.ts",
-    "./teams/drawer-pink-styles": "./src/teams/drawer-pink-styles.ts",
-    "./reveal/*": "./src/reveal/*.tsx",
-    "./reveal/stages": "./src/reveal/stages.ts",
-    "./reveal/reveal-hooks": "./src/reveal/reveal-hooks.ts",
-    "./lib/*": "./src/lib/*.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./points/*": {
+      "types": "./dist/points/*.d.ts",
+      "default": "./dist/points/*.js"
+    },
+    "./teams/*": {
+      "types": "./dist/teams/*.d.ts",
+      "default": "./dist/teams/*.js"
+    },
+    "./teams/star-map-types": {
+      "types": "./dist/teams/star-map-types.d.ts",
+      "default": "./dist/teams/star-map-types.js"
+    },
+    "./teams/star-map-utils": {
+      "types": "./dist/teams/star-map-utils.d.ts",
+      "default": "./dist/teams/star-map-utils.js"
+    },
+    "./teams/drawer-pink-styles": {
+      "types": "./dist/teams/drawer-pink-styles.d.ts",
+      "default": "./dist/teams/drawer-pink-styles.js"
+    },
+    "./reveal/*": {
+      "types": "./dist/reveal/*.d.ts",
+      "default": "./dist/reveal/*.js"
+    },
+    "./reveal/stages": {
+      "types": "./dist/reveal/stages.d.ts",
+      "default": "./dist/reveal/stages.js"
+    },
+    "./reveal/reveal-hooks": {
+      "types": "./dist/reveal/reveal-hooks.d.ts",
+      "default": "./dist/reveal/reveal-hooks.js"
+    },
+    "./lib/*": {
+      "types": "./dist/lib/*.d.ts",
+      "default": "./dist/lib/*.js"
+    }
   },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@heybray/gamification": "^0.0.1",
     "@heybray/react": "^0.0.1",
