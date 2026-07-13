@@ -1,5 +1,5 @@
 {
-  "name": "@heybray/gamification",
+  "name": "@heybray/media",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -12,11 +12,10 @@
     "./schema": "./src/schema/index.ts"
   },
   "dependencies": {
-    "@heybray/identity": "*",
-    "@heybray/server-kit": "*",
-    "@heybray/taxonomy": "*",
+    "@heybray/identity": "^0.0.1",
+    "@heybray/server-kit": "^0.0.1",
     "drizzle-orm": "^0.45.2",
     "express": "^4.21.2",
-    "zod": "^3.25.76"
+    "multer": "^2.2.0"
   }
 }

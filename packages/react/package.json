@@ -18,8 +18,8 @@
     "./extensions/*": "./src/extensions/*.ts"
   },
   "dependencies": {
-    "@heybray/identity": "*",
-    "@heybray/ui": "*"
+    "@heybray/identity": "^0.0.1",
+    "@heybray/ui": "^0.0.1"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.60.5",

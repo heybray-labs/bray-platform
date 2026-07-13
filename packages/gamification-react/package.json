@@ -19,9 +19,9 @@
     "./lib/*": "./src/lib/*.ts"
   },
   "dependencies": {
-    "@heybray/gamification": "*",
-    "@heybray/react": "*",
-    "@heybray/ui": "*"
+    "@heybray/gamification": "^0.0.1",
+    "@heybray/react": "^0.0.1",
+    "@heybray/ui": "^0.0.1"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.60.5",

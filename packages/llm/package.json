@@ -11,7 +11,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@heybray/server-kit": "*",
+    "@heybray/server-kit": "^0.0.1",
     "@langchain/anthropic": "^1.5.1",
     "@langchain/core": "^1.2.1",
     "@langchain/google-genai": "^2.2.0",
