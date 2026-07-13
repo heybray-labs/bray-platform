@@ -3,17 +3,44 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
+  "license": "AGPL-3.0-only",
   "scripts": {
+    "build": "tsup",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./components/*": "./src/components/*.tsx",
-    "./hooks/*": "./src/hooks/*.ts",
-    "./utils": "./src/utils.ts",
-    "./ContentHeaderCard": "./src/ContentHeaderCard.tsx",
-    "./tailwind-preset": "./src/tailwind-preset.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./components/*": {
+      "types": "./dist/components/*.d.ts",
+      "default": "./dist/components/*.js"
+    },
+    "./hooks/*": {
+      "types": "./dist/hooks/*.d.ts",
+      "default": "./dist/hooks/*.js"
+    },
+    "./utils": {
+      "types": "./dist/utils.d.ts",
+      "default": "./dist/utils.js"
+    },
+    "./ContentHeaderCard": {
+      "types": "./dist/ContentHeaderCard.d.ts",
+      "default": "./dist/ContentHeaderCard.js"
+    },
+    "./tailwind-preset": {
+      "types": "./dist/tailwind-preset.d.ts",
+      "default": "./dist/tailwind-preset.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "date-fns": "^2.30.0"
   },
   "peerDependencies": {
     "@radix-ui/react-avatar": "^1.1.4",
@@ -37,9 +64,6 @@
     "react-dom": "^18.3.1",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7"
-  },
-  "dependencies": {
-    "date-fns": "^2.30.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.11",
