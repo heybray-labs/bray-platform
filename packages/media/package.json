@@ -1,6 +1,6 @@
 {
   "name": "@heybray/media",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "build": "tsup",
@@ -18,8 +18,8 @@
     }
   },
   "dependencies": {
-    "@heybray/identity": "^0.0.1",
-    "@heybray/server-kit": "^0.0.1",
+    "@heybray/identity": "^0.1.0",
+    "@heybray/server-kit": "^0.1.0",
     "drizzle-orm": "^0.45.2",
     "express": "^4.21.2",
     "multer": "^2.2.0"
