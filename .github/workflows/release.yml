@@ -35,14 +35,15 @@ jobs:
       # On a push to main with pending changesets, this opens/updates a
       # "Version Packages" PR. On a push to main where that PR was just
       # merged (i.e. no pending changesets, versions already bumped), it
-      # publishes every changed package to npm instead. Disabled until the
-      # Step 8 human checkpoint (npm org access, NPM_TOKEN secret,
-      # .changeset/config.json access:"public") is confirmed.
+      # publishes every changed package to npm instead.
       - name: Create release PR or publish to npm
-        if: false
         uses: changesets/action@v1
         with:
           publish: npx changeset publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # Attaches npm provenance (verifiable build-to-publish attestation)
+          # to every package published from this workflow. Requires the
+          # id-token: write permission above and npm >= 9.5.
+          NPM_CONFIG_PROVENANCE: "true"
