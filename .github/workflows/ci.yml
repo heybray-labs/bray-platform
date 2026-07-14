@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Typecheck & build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx turbo run typecheck build
+
+  examples-integration:
+    name: examples/basic-app integration
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: basic_app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d basic_app"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/basic_app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # examples/basic-app must consume every package's built dist/, not
+      # source — that's the point of this job: prove the published shape
+      # actually works, not just the monorepo-linked shape.
+      - run: npx turbo run build
+
+      - name: Apply migrations + seed
+        run: npm run db:init --workspace=basic-app
+
+      - name: Boot the API and smoke-test it
+        run: |
+          npm run start --workspace=basic-app &
+          SERVER_PID=$!
+          for i in $(seq 1 20); do
+            if curl -sf http://localhost:3101/api/health > /dev/null; then break; fi
+            sleep 1
+          done
+          curl -sf http://localhost:3101/api/health
+
+          SETUP=$(curl -sf -X POST http://localhost:3101/api/auth/setup-admin \
+            -H 'Content-Type: application/json' \
+            -d '{"name":"CI Admin","email":"ci-admin@example.com","password":"ci-password-123"}')
+          TOKEN=$(echo "$SETUP" | node -e "process.stdin.once('data', d => console.log(JSON.parse(d).token))")
+
+          curl -sf http://localhost:3101/api/taxonomy -H "Authorization: Bearer $TOKEN" | grep -q '"category"'
+
+          NOTE=$(curl -sf -X POST http://localhost:3101/api/notes \
+            -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+            -d '{"title":"CI smoke-test note"}')
+          NOTE_ID=$(echo "$NOTE" | node -e "process.stdin.once('data', d => console.log(JSON.parse(d).note.id))")
+
+          curl -sf -X POST "http://localhost:3101/api/notes/$NOTE_ID/complete" \
+            -H "Authorization: Bearer $TOKEN" | grep -q '"pointsAwarded":10'
+
+          curl -sf http://localhost:3101/api/points/leaderboard -H "Authorization: Bearer $TOKEN" \
+            | grep -q '"points":10'
+
+          kill $SERVER_PID
+        working-directory: examples/basic-app

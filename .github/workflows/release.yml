@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Version or publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+
+      - run: npx turbo run build
+
+      # On a push to main with pending changesets, this opens/updates a
+      # "Version Packages" PR. On a push to main where that PR was just
+      # merged (i.e. no pending changesets, versions already bumped), it
+      # publishes every changed package to npm instead. Disabled until the
+      # Step 8 human checkpoint (npm org access, NPM_TOKEN secret,
+      # .changeset/config.json access:"public") is confirmed.
+      - name: Create release PR or publish to npm
+        if: false
+        uses: changesets/action@v1
+        with:
+          publish: npx changeset publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
