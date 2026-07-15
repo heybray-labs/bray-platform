@@ -1,5 +1,17 @@
 # @heybray/gamification-react
 
+## 0.1.1
+
+### Patch Changes
+
+- 96e4867: Republish all platform packages from CI to verify npm publish access after
+  the initial 0.1.0 release. Includes the getAppVersion() path fix in
+  server-kit.
+- Updated dependencies [96e4867]
+  - @heybray/gamification@0.1.1
+  - @heybray/react@0.1.1
+  - @heybray/ui@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
