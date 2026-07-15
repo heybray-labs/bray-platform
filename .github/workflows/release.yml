@@ -48,7 +48,7 @@ jobs:
           # publishing" instead — which requires a trusted-publisher config
           # on npmjs.com per package and isn't set up here, so it no-ops.
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          # Attaches npm provenance (verifiable build-to-publish attestation)
-          # to every package published from this workflow. Requires the
-          # id-token: write permission above and npm >= 9.5.
-          NPM_CONFIG_PROVENANCE: "true"
+          # Provenance disabled temporarily: patch publishes were signing
+          # attestations then failing with a misleading E404 on PUT. Re-enable
+          # once server-kit@0.1.1+ publishes reliably from CI.
+          NPM_CONFIG_PROVENANCE: "false"
