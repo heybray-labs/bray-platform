@@ -1,5 +1,16 @@
 # @heybray/gamification
 
+## 0.2.0
+
+### Minor Changes
+
+- 1ba24ab: Add `GamificationService.setRewardTiers` and `ensureDefaultRewardTiers`, accept mastery dimension slug on leaderboard scope queries (back-compat with `category`), and remove misleading `content_type` schema defaults.
+
+### Patch Changes
+
+- Updated dependencies [1ba24ab]
+  - @heybray/taxonomy@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes

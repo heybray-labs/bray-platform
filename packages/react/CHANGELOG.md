@@ -1,5 +1,13 @@
 # @heybray/react
 
+## 0.1.2
+
+### Patch Changes
+
+- 1ba24ab: Generalize gamification-react for multi-app content: configurable leaderboard mastery scope token, content-neutral star map path helpers and drawer props, and `gamificationContentType` on AppConfig for panel deep links.
+- Updated dependencies [1ba24ab]
+  - @heybray/taxonomy@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes

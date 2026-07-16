@@ -1,6 +1,6 @@
 {
   "name": "@heybray/react",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "license": "AGPL-3.0-only",
   "repository": {
@@ -58,7 +58,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@heybray/identity": "^0.1.1",
-    "@heybray/taxonomy": "^0.1.1",
+    "@heybray/taxonomy": "^0.1.2",
     "@heybray/ui": "^0.1.1"
   },
   "peerDependencies": {
