@@ -165,7 +165,7 @@ Package app domain as `@heybray/flashcards-server` + `@heybray/flashcards-client
 
 - [x] **Owner approves** template-repo recommendation  
 - [x] Update `bray-scenarios/docs/platform-architecture.md` §7: Phase 5 marked complete  
-- [ ] Open issue/milestone to extract `bray-app-template` from `examples/basic-app`
+- [x] Open issue/milestone to extract `bray-app-template` from `examples/basic-app` — [#7](https://github.com/heybray-labs/bray-platform/issues/7)
 
 **Approver:** Gareth Shercliff (owner)  
 **Date ratified:** 2026-07-16
