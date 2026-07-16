@@ -54,6 +54,8 @@ type CategoryOption = {
 type LeaderboardPanelProps = {
   categoryOptions?: CategoryOption[];
   className?: string;
+  /** Wire token for mastery-scoped leaderboard (default `category`; use mastery dimension slug e.g. `topic`). */
+  masteryScopeToken?: string;
 };
 
 const CURRENT_USER_ROW = "font-semibold";
@@ -227,11 +229,15 @@ function CurrentUserRankBar({ entry }: { entry: LeaderboardEntry }) {
   );
 }
 
-export function LeaderboardPanel({ categoryOptions = [], className }: LeaderboardPanelProps) {
+export function LeaderboardPanel({
+  categoryOptions = [],
+  className,
+  masteryScopeToken = "category",
+}: LeaderboardPanelProps) {
   const [selection, setSelection] = useState(GLOBAL_LEADERBOARD_VALUE);
   const [period, setPeriod] = useState<"all_time" | "month">("all_time");
 
-  const scopeTab = selection === GLOBAL_LEADERBOARD_VALUE ? "global" : "category";
+  const scopeTab = selection === GLOBAL_LEADERBOARD_VALUE ? "global" : masteryScopeToken;
   const effectiveCategory =
     selection === GLOBAL_LEADERBOARD_VALUE
       ? categoryOptions[0]?.slug ?? ""
@@ -240,7 +246,7 @@ export function LeaderboardPanel({ categoryOptions = [], className }: Leaderboar
   const selectedCategory = categoryOptions.find((c) => c.slug === effectiveCategory);
 
   const queryKey = useMemo(
-    () => ["/api/points/leaderboard", scopeTab, scopeTab === "category" ? effectiveCategory : null, period],
+    () => ["/api/points/leaderboard", scopeTab, scopeTab !== "global" ? effectiveCategory : null, period],
     [scopeTab, effectiveCategory, period],
   );
 
@@ -254,7 +260,7 @@ export function LeaderboardPanel({ categoryOptions = [], className }: Leaderboar
       params.set("scope", scopeTab);
       params.set("period", period);
       params.set("limit", String(LEADERBOARD_LIMIT));
-      if (scopeTab === "category" && effectiveCategory) {
+      if (scopeTab !== "global" && effectiveCategory) {
         params.set("category", effectiveCategory);
       }
       return apiRequest("GET", `/api/points/leaderboard?${params.toString()}`);

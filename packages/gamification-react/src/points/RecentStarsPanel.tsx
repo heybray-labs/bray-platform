@@ -127,7 +127,7 @@ function RecentStarRow({
 }
 
 export function RecentStarsPanel({ className }: RecentStarsPanelProps) {
-  const { routes } = useAppConfig();
+  const { routes, gamificationContentType = "scenario" } = useAppConfig();
   const [, navigate] = useLocation();
 
   const { data, isLoading } = useQuery<{ items: RecentStarItem[] }>({
@@ -158,7 +158,7 @@ export function RecentStarsPanel({ className }: RecentStarsPanelProps) {
             <RecentStarRow
               key={item.id}
               item={item}
-              onSelect={() => navigate(routes.contentPath("scenario", item.contentId))}
+              onSelect={() => navigate(routes.contentPath(gamificationContentType, item.contentId))}
             />
           ))}
         </div>
