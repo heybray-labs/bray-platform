@@ -1,6 +1,6 @@
 {
   "name": "@heybray/gamification-react",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "license": "AGPL-3.0-only",
   "repository": {
@@ -35,6 +35,10 @@
       "types": "./dist/teams/star-map-utils.d.ts",
       "default": "./dist/teams/star-map-utils.js"
     },
+    "./teams/star-map-paths": {
+      "types": "./dist/teams/star-map-paths.d.ts",
+      "default": "./dist/teams/star-map-paths.js"
+    },
     "./teams/drawer-pink-styles": {
       "types": "./dist/teams/drawer-pink-styles.d.ts",
       "default": "./dist/teams/drawer-pink-styles.js"
@@ -60,7 +64,7 @@
     "dist"
   ],
   "dependencies": {
-    "@heybray/gamification": "^0.3.0",
+    "@heybray/gamification": "^0.3.1",
     "@heybray/react": "^0.1.2",
     "@heybray/ui": "^0.1.1"
   },

@@ -1,5 +1,11 @@
 # @heybray/gamification
 
+## 0.3.1
+
+### Patch Changes
+
+- Ship star-map-paths subpath exports (missing from 0.3.0 build entries).
+
 ## 0.3.0
 
 ### Minor Changes

@@ -15,6 +15,7 @@ export default defineConfig({
     index: "src/index.ts",
     "teams/star-map-types": "src/teams/star-map-types.ts",
     "teams/star-map-utils": "src/teams/star-map-utils.ts",
+    "teams/star-map-paths": "src/teams/star-map-paths.ts",
     "teams/drawer-pink-styles": "src/teams/drawer-pink-styles.ts",
     "reveal/stages": "src/reveal/stages.ts",
     "reveal/reveal-hooks": "src/reveal/reveal-hooks.ts",

@@ -17,6 +17,7 @@ export * from "./teams/StarMapSummaryCards.tsx";
 export * from "./teams/TeamStarMapComponents.tsx";
 export * from "./teams/star-map-types.ts";
 export * from "./teams/star-map-utils.ts";
+export * from "./teams/star-map-paths.ts";
 export * from "./teams/drawer-pink-styles.ts";
 export * from "./lib/reward-tier-utils.ts";
 export * from "./reveal/stages.ts";

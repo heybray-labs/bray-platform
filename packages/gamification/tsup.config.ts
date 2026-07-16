@@ -4,6 +4,7 @@ export default defineConfig({
   entry: {
     index: "src/index.ts",
     "schema/index": "src/schema/index.ts",
+    "star-map-paths": "src/star-map-paths.ts",
   },
   format: ["esm"],
   dts: true,
