@@ -138,7 +138,11 @@ export function createMediaRouter(guards: MediaRouteGuards): Router {
         return res.status(400).json({ error: "Invalid media id" });
       }
       const { usageCount } = await mediaService.delete(id);
-      res.json({ message: "Deleted", detachedFromScenarios: usageCount });
+      res.json({
+        message: "Deleted",
+        detachedCount: usageCount,
+        detachedFromScenarios: usageCount, // DEPRECATED: removed in 2.0.0 — use detachedCount
+      });
     } catch (error) {
       if (error instanceof MediaNotFoundError) {
         return res.status(404).json({ error: error.message });

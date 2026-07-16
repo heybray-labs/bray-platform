@@ -20,7 +20,7 @@ interface MediaManagementPanelProps {
   contentNoun: string;
   /** Query key to invalidate when media is detached from content (e.g. "/api/decks"). */
   contentInvalidateKey: string;
-  /** Render an app-specific cover preview for a media asset (e.g. ScenarioCover). */
+  /** Render an app-specific cover preview for a media asset (e.g. ItemCover). */
   renderCover: (mediaId: number) => ReactNode;
 }
 
@@ -43,10 +43,10 @@ export function MediaManagementPanel({
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => apiRequest("DELETE", `/api/media/${id}`),
-    onSuccess: (result: { detachedFromScenarios?: number }) => {
+    onSuccess: (result: { detachedCount?: number; detachedFromScenarios?: number }) => { // DEPRECATED: detachedFromScenarios
       queryClient.invalidateQueries({ queryKey: ["/api/media"] });
       queryClient.invalidateQueries({ queryKey: [contentInvalidateKey] });
-      const n = result?.detachedFromScenarios ?? 0;
+      const n = result?.detachedCount ?? result?.detachedFromScenarios ?? 0; // DEPRECATED: detachedFromScenarios fallback
       toast({
         title: "Image deleted",
         description:
