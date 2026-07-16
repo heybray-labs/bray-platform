@@ -27,10 +27,22 @@ jobs:
           node-version: 20
           cache: npm
           registry-url: https://registry.npmjs.org
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - run: npm ci
 
       - run: npx turbo run build
+
+      - name: Verify npm publish credentials
+        run: |
+          if [ -z "${NPM_TOKEN:-}" ]; then
+            echo "::error::NPM_TOKEN secret is empty. Add an npm Automation token for the @heybray scope."
+            exit 1
+          fi
+          npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # On a push to main with pending changesets, this opens/updates a
       # "Version Packages" PR. On a push to main where that PR was just
@@ -42,13 +54,7 @@ jobs:
           publish: npx changeset publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # changesets/action's own publish step specifically checks for an
-          # env var literally named NPM_TOKEN to pick classic token auth. If
-          # it's absent, it silently switches to npm's OIDC "trusted
-          # publishing" instead — which requires a trusted-publisher config
-          # on npmjs.com per package and isn't set up here, so it no-ops.
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          # Provenance disabled temporarily: patch publishes were signing
-          # attestations then failing with a misleading E404 on PUT. Re-enable
-          # once server-kit@0.1.1+ publishes reliably from CI.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          # Provenance re-enabled in a follow-up commit after NPM_TOKEN checkpoint (Part A step 3).
           NPM_CONFIG_PROVENANCE: "false"
