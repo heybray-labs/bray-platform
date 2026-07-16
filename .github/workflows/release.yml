@@ -36,7 +36,7 @@ jobs:
 
       - name: Verify npm publish credentials
         run: |
-          if [ -z "${NPM_TOKEN:-}" ]; then
+          if [ -z "${NODE_AUTH_TOKEN:-}" ]; then
             echo "::error::NPM_TOKEN secret is empty. Add an npm Automation token for the @heybray scope."
             exit 1
           fi
