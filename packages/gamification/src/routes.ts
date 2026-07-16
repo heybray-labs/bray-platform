@@ -23,9 +23,27 @@ export interface GamificationRouterOptions {
 
 /**
  * Builds the /api/points routes (same paths as the app's legacy points router).
- * The public query contract is unchanged: `scope=category&category=<slug>` maps
- * onto the service's generic `dimension-option` scope + option slug.
+ * Leaderboard scope accepts the legacy `category` token, the configured mastery
+ * dimension slug (e.g. `topic`), or `dimension-option` — all map to the
+ * service's generic dimension-option scope + option slug query param.
  */
+export function resolveLeaderboardScope(
+  queryScope: unknown,
+  masteryDimensionSlug: string,
+): "global" | "dimension-option" {
+  if (queryScope == null || queryScope === "" || queryScope === "global") {
+    return "global";
+  }
+  if (
+    queryScope === "category" ||
+    queryScope === masteryDimensionSlug ||
+    queryScope === "dimension-option"
+  ) {
+    return "dimension-option";
+  }
+  return "global";
+}
+
 export function createGamificationRouter(
   config: GamificationConfig,
   options: GamificationRouterOptions = {},
@@ -84,7 +102,7 @@ export function createGamificationRouter(
 
   router.get("/leaderboard", ...(options.leaderboardMiddleware ?? []), async (req: AuthRequest, res: Response) => {
     try {
-      const scope = req.query.scope === "category" ? "dimension-option" : "global";
+      const scope = resolveLeaderboardScope(req.query.scope, config.masteryDimensionSlug);
       const period = req.query.period === "month" ? "month" : "all_time";
       const optionSlug =
         typeof req.query.category === "string" ? req.query.category : undefined;

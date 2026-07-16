@@ -16,7 +16,7 @@ import { classificationOptions } from "./classifications.ts";
 export const contentClassificationLinks = pgTable(
   "content_classification_links",
   {
-    contentType: text("content_type").notNull().default("scenario"),
+    contentType: text("content_type").notNull(),
     contentId: integer("content_id").notNull(),
     optionId: integer("option_id")
       .notNull()

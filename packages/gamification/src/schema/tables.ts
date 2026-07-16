@@ -33,7 +33,7 @@ export const rewardTiers = pgTable(
   "reward_tiers",
   {
     id: serial("id").primaryKey(),
-    contentType: text("content_type").notNull().default("scenario"),
+    contentType: text("content_type").notNull(),
     contentId: integer("content_id").notNull(),
     tierName: text("tier_name").notNull(),
     minScorePercent: integer("min_score_percent").notNull(),
@@ -61,7 +61,7 @@ export const userContentTierAwards = pgTable(
     userId: integer("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    contentType: text("content_type").notNull().default("scenario"),
+    contentType: text("content_type").notNull(),
     contentId: integer("content_id").notNull(),
     highestTierId: integer("highest_tier_id").references(() => rewardTiers.id, {
       onDelete: "set null",

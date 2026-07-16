@@ -19,51 +19,92 @@ import {
 } from "../points/CategoryMasteryBar.tsx";
 import { drawerPink } from "./drawer-pink-styles.ts";
 import type { ContentHistoryItem } from "./star-map-types.ts";
+import { legacyMemberScenarioHistoryPath } from "./star-map-paths.ts";
 import { cn } from "@heybray/ui/utils";
 import { ChevronDown, Loader2, X } from "lucide-react";
 
-type MemberScenarioHistory = {
+type MemberContentHistoryCategory = {
+  slug: string;
+  label: string;
+  total: number;
+  starCounts: { gold: number; silver: number; bronze: number };
+  contents: ContentHistoryItem[];
+};
+
+type MemberContentHistory = {
   userId: number;
   name: string;
   avatarInitials: string;
   teamName: string | null;
   totalPoints: number;
   passRate: number;
-  categories: Array<{
-    slug: string;
-    label: string;
-    total: number;
-    starCounts: { gold: number; silver: number; bronze: number };
-    scenarios: ContentHistoryItem[];
-  }>;
+  categories: MemberContentHistoryCategory[];
 };
 
-export type ScenarioListRowProps = {
+export type ContentListRowProps = {
   item: ContentHistoryItem;
   teamId: number | "all";
   memberUserId: number;
 };
+
+/** @deprecated Use `ContentListRowProps` */
+export type ScenarioListRowProps = ContentListRowProps;
 
 type MemberProgressDrawerProps = {
   teamId: number | "all";
   userId: number | null;
   initialExpandedCategory?: string | null;
   onClose: () => void;
-  /** App-supplied row renderer (joins roleplay attempt transcript data). */
-  ScenarioListRowComponent: ComponentType<ScenarioListRowProps>;
+  /** App-supplied row renderer (joins attempt transcript data). */
+  ContentListRowComponent: ComponentType<ContentListRowProps>;
+  /** @deprecated Use `ContentListRowComponent` */
+  ScenarioListRowComponent?: ComponentType<ContentListRowProps>;
+  /** Build the member history endpoint. Defaults to legacy `/scenario-history`. */
+  memberHistoryPath?: (teamId: number | "all", userId: number) => string;
+  /** Singular content noun for headings (e.g. `deck`, `scenario`). */
+  contentNoun?: string;
+  /** Plural content noun for empty states (e.g. `decks`, `scenarios`). */
+  contentNounPlural?: string;
 };
+
+function normalizeMemberHistory(raw: unknown): MemberContentHistory {
+  const data = raw as {
+    userId: number;
+    name: string;
+    avatarInitials: string;
+    teamName: string | null;
+    totalPoints: number;
+    passRate: number;
+    categories: Array<{
+      slug: string;
+      label: string;
+      total: number;
+      starCounts: { gold: number; silver: number; bronze: number };
+      contents?: ContentHistoryItem[];
+      scenarios?: ContentHistoryItem[];
+    }>;
+  };
+
+  return {
+    ...data,
+    categories: data.categories.map((category) => ({
+      ...category,
+      contents: category.contents ?? category.scenarios ?? [],
+    })),
+  };
+}
 
 function CategorySection({
   category,
   teamId,
   memberUserId,
-  ScenarioListRowComponent,
+  ContentListRowComponent,
   defaultOpen,
 }: {
-  category: MemberScenarioHistory["categories"][number];
+  category: MemberContentHistoryCategory;
   teamId: number | "all";
   memberUserId: number;
-  ScenarioListRowComponent: ComponentType<ScenarioListRowProps>;
+  ContentListRowComponent: ComponentType<ContentListRowProps>;
   defaultOpen: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -110,10 +151,10 @@ function CategorySection({
             drawerPink.categoryBody,
           )}
         >
-          {category.scenarios.map((scenario) => (
-            <ScenarioListRowComponent
-              key={scenario.contentId}
-              item={scenario}
+          {category.contents.map((item) => (
+            <ContentListRowComponent
+              key={item.contentId}
+              item={item}
               teamId={teamId}
               memberUserId={memberUserId}
             />
@@ -129,16 +170,27 @@ export function MemberProgressDrawer({
   userId,
   initialExpandedCategory = null,
   onClose,
+  ContentListRowComponent,
   ScenarioListRowComponent,
+  memberHistoryPath = legacyMemberScenarioHistoryPath,
+  contentNoun = "scenario",
+  contentNounPlural,
 }: MemberProgressDrawerProps) {
-  const { data, isLoading } = useQuery<MemberScenarioHistory>({
-    queryKey: [`/api/teams/${teamId}/members/${userId}/scenario-history`],
-    queryFn: () =>
-      apiRequest("GET", `/api/teams/${teamId}/members/${userId}/scenario-history`),
-    enabled: userId != null,
+  const RowComponent = ContentListRowComponent ?? ScenarioListRowComponent;
+  const pluralNoun = contentNounPlural ?? `${contentNoun}s`;
+  const historyPath =
+    userId != null ? memberHistoryPath(teamId, userId) : null;
+
+  const { data, isLoading } = useQuery<MemberContentHistory>({
+    queryKey: historyPath ? [historyPath] : ["member-content-history", "disabled"],
+    queryFn: async () => {
+      const raw = await apiRequest("GET", historyPath!);
+      return normalizeMemberHistory(raw);
+    },
+    enabled: userId != null && historyPath != null,
   });
 
-  if (userId == null) return null;
+  if (userId == null || !RowComponent) return null;
 
   return (
     <>
@@ -198,12 +250,12 @@ export function MemberProgressDrawer({
           {data && (
             <div className="p-5">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                Scenario history
+                {contentNoun.charAt(0).toUpperCase() + contentNoun.slice(1)} history
               </h3>
               <div className="space-y-2">
                 {data.categories.length === 0 ? (
                   <p className="text-sm text-muted-foreground py-4 text-center">
-                    No categorized scenarios yet.
+                    No categorized {pluralNoun} yet.
                   </p>
                 ) : (
                   data.categories.map((category) => (
@@ -212,7 +264,7 @@ export function MemberProgressDrawer({
                       category={category}
                       teamId={teamId}
                       memberUserId={data.userId}
-                      ScenarioListRowComponent={ScenarioListRowComponent}
+                      ContentListRowComponent={RowComponent}
                       defaultOpen={initialExpandedCategory === category.slug}
                     />
                   ))

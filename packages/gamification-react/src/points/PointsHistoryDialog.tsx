@@ -45,7 +45,7 @@ function formatDateTime(value: string) {
 }
 
 export function PointsHistoryDialog({ open, onOpenChange }: PointsHistoryDialogProps) {
-  const { routes } = useAppConfig();
+  const { routes, gamificationContentType = "scenario", displayName } = useAppConfig();
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
@@ -93,14 +93,14 @@ export function PointsHistoryDialog({ open, onOpenChange }: PointsHistoryDialogP
             <p className="text-sm text-muted-foreground py-6 text-center">Loading…</p>
           ) : !data?.items.length ? (
             <p className="text-sm text-muted-foreground py-6 text-center">
-              No points earned yet. Complete scenarios to start earning points.
+              No points earned yet. Complete {displayName.toLowerCase()} activities to start earning points.
             </p>
           ) : (
             <table className="w-full text-sm mt-2">
               <thead className="sticky top-0 bg-background z-10">
                 <tr className="border-b text-xs text-muted-foreground">
                   <th className="py-2 pr-3 text-left font-medium">Date & time</th>
-                  <th className="py-2 pr-3 text-left font-medium">Scenario</th>
+                  <th className="py-2 pr-3 text-left font-medium">Activity</th>
                   <th className="py-2 pr-3 text-left font-medium">Achievement</th>
                   <th className="py-2 text-right font-medium">Points</th>
                 </tr>
@@ -113,12 +113,12 @@ export function PointsHistoryDialog({ open, onOpenChange }: PointsHistoryDialogP
                     </td>
                     <td className="py-2 pr-3 font-medium align-top">
                       <span className="inline-flex items-center gap-1.5 max-w-full">
-                        <span className="line-clamp-2">{item.contentTitle ?? "Scenario"}</span>
+                        <span className="line-clamp-2">{item.contentTitle ?? "Activity"}</span>
                         {item.contentId != null && (
                           <Link
-                            href={routes.contentPath("scenario", item.contentId)}
+                            href={routes.contentPath(gamificationContentType, item.contentId)}
                             className="shrink-0 text-muted-foreground hover:text-primary"
-                            title="Open scenario"
+                            title="Open activity"
                             onClick={() => onOpenChange(false)}
                           >
                             <SquareArrowOutUpRight className="h-3.5 w-3.5" />

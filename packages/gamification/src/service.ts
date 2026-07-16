@@ -18,6 +18,9 @@ import {
   contentClassificationLinks,
   pointTransactions,
   resolveRewardTierDisplay,
+  normalizeRewardTiers,
+  tierNameFromStarLevel,
+  DEFAULT_REWARD_TIERS,
   type RewardTier,
   type RewardTierInput,
 } from "./schema/index.ts";
@@ -139,6 +142,69 @@ export class GamificationService {
       map.set(row.contentId, existing);
     }
     return map;
+  }
+
+  async setRewardTiers(
+    contentType: string,
+    contentId: number,
+    rawTiers: RewardTierInput[],
+  ): Promise<RewardTier[]> {
+    if (!rawTiers.length) {
+      await db
+        .delete(rewardTiers)
+        .where(and(eq(rewardTiers.contentType, contentType), eq(rewardTiers.contentId, contentId)));
+      return [];
+    }
+
+    const normalized = normalizeRewardTiers(rawTiers);
+    const existingTiers = await db
+      .select()
+      .from(rewardTiers)
+      .where(and(eq(rewardTiers.contentType, contentType), eq(rewardTiers.contentId, contentId)));
+
+    const keptTierIds: number[] = [];
+    let tierOrderIndex = 0;
+    for (const tier of normalized) {
+      const starLevel = tier.starLevel ?? tierOrderIndex + 1;
+      const display = resolveRewardTierDisplay({ starLevel });
+      const data = {
+        contentType,
+        contentId,
+        tierName: tierNameFromStarLevel(starLevel),
+        minScorePercent: tier.minScorePercent,
+        rewardPoints: tier.rewardPoints,
+        orderIndex: tier.orderIndex ?? tierOrderIndex++,
+        starLevel,
+        color: display.color,
+        icon: null as string | null,
+      };
+      const existingMatch = tier.id
+        ? existingTiers.find((e) => e.id === tier.id)
+        : existingTiers.find((e) => e.starLevel === starLevel);
+      if (existingMatch) {
+        await db.update(rewardTiers).set(data).where(eq(rewardTiers.id, existingMatch.id));
+        keptTierIds.push(existingMatch.id);
+      } else {
+        const [inserted] = await db.insert(rewardTiers).values(data).returning();
+        keptTierIds.push(inserted.id);
+      }
+    }
+
+    const tiersToDelete = existingTiers
+      .filter((e) => !keptTierIds.includes(e.id))
+      .map((e) => e.id);
+    if (tiersToDelete.length) {
+      await db.delete(rewardTiers).where(inArray(rewardTiers.id, tiersToDelete));
+    }
+
+    return this.getRewardTiers(contentType, contentId);
+  }
+
+  async ensureDefaultRewardTiers(contentType: string, contentId: number): Promise<RewardTier[]> {
+    const existing = await this.getRewardTiers(contentType, contentId);
+    if (existing.length > 0) return existing;
+    const defaults = this.config.tierDefaults ?? DEFAULT_REWARD_TIERS;
+    return this.setRewardTiers(contentType, contentId, defaults);
   }
 
   // ---- recording results / awarding points ----------------------------------

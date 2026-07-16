@@ -27,6 +27,8 @@ export interface AppConfig {
   tagline?: string;
   urls: AppConfigUrls;
   routes: AppConfigRoutes;
+  /** Primary gamified content type slug (e.g. `scenario`, `deck`). Used by gamification-react panels for deep links. */
+  gamificationContentType?: string;
 }
 
 const AppConfigContext = createContext<AppConfig | null>(null);
