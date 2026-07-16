@@ -1,6 +1,6 @@
 # ADR: Standalone app composition shape (Phase 5)
 
-**Status:** Proposed — awaiting owner ratification  
+**Status:** Ratified  
 **Date:** 2026-07-16  
 **Context:** Phase 5 validation app [`heybray-labs/bray-flashcards`](https://github.com/heybray-labs/bray-flashcards)  
 **Friction log:** [`bray-flashcards/docs/friction-log.md`](https://github.com/heybray-labs/bray-flashcards/blob/main/docs/friction-log.md) (FL-001–FL-021)
@@ -163,9 +163,9 @@ Package app domain as `@heybray/flashcards-server` + `@heybray/flashcards-client
 
 ## Ratification
 
-- [ ] **Owner approves** template-repo recommendation  
-- [ ] Update `bray-scenarios/docs/platform-architecture.md` §7: Phase 5 marked complete  
+- [x] **Owner approves** template-repo recommendation  
+- [x] Update `bray-scenarios/docs/platform-architecture.md` §7: Phase 5 marked complete  
 - [ ] Open issue/milestone to extract `bray-app-template` from `examples/basic-app`
 
-**Approver:** _pending_  
-**Date ratified:** _pending_
+**Approver:** Gareth Shercliff (owner)  
+**Date ratified:** 2026-07-16
