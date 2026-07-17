@@ -54,8 +54,15 @@ type CategoryOption = {
 type LeaderboardPanelProps = {
   categoryOptions?: CategoryOption[];
   className?: string;
-  /** Wire token for mastery-scoped leaderboard (default `category`; use mastery dimension slug e.g. `topic`). */
+  /**
+   * Wire token for mastery-scoped leaderboard (default `category`).
+   * Pass the mastery dimension slug for the content type this panel represents
+   * (e.g. `topic` for decks, `category` for scenarios). Premium multi-tab UIs
+   * mount one panel per content type with the matching token.
+   */
   masteryScopeToken?: string;
+  /** Optional content type label for multi-domain hosts (display only). */
+  contentTypeLabel?: string;
 };
 
 const CURRENT_USER_ROW = "font-semibold";
@@ -233,6 +240,7 @@ export function LeaderboardPanel({
   categoryOptions = [],
   className,
   masteryScopeToken = "category",
+  contentTypeLabel: _contentTypeLabel,
 }: LeaderboardPanelProps) {
   const [selection, setSelection] = useState(GLOBAL_LEADERBOARD_VALUE);
   const [period, setPeriod] = useState<"all_time" | "month">("all_time");

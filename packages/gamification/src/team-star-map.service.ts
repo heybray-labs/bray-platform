@@ -137,6 +137,10 @@ export class TeamStarMapService {
       .limit(1);
 
     const stats = await this.gamification.getUserProgressStats(userId);
+    const categoryMastery = await this.gamification.getMasteryRankings(
+      userId,
+      this.config.contentType,
+    );
     const name = userDisplayName(userRow?.firstName, userRow?.email ?? "");
     const passRate = stats.publishedCount > 0 ? stats.passedCount / stats.publishedCount : 0;
 
@@ -151,7 +155,7 @@ export class TeamStarMapService {
       publishedCount: stats.publishedCount,
       passRate,
       currentWeekActive: stats.currentWeekActive,
-      categoryMastery: stats.categoryMastery.map((row) => ({
+      categoryMastery: categoryMastery.map((row) => ({
         slug: row.slug,
         label: row.label,
         total: row.total,
@@ -356,6 +360,7 @@ export class TeamStarMapService {
       .where(
         and(
           eq(gamificationContent.isActive, true),
+          eq(gamificationContent.contentType, this.config.contentType),
           eq(classificationDimensions.slug, this.config.masteryDimensionSlug),
         ),
       );
@@ -378,6 +383,7 @@ export class TeamStarMapService {
         .where(
           and(
             eq(userContentTierAwards.userId, memberUserId),
+            eq(userContentTierAwards.contentType, this.config.contentType),
             eq(gamificationContent.isActive, true),
           ),
         ),
@@ -397,7 +403,11 @@ export class TeamStarMapService {
           ),
         )
         .where(
-          and(eq(activityLog.userId, memberUserId), eq(gamificationContent.isActive, true)),
+          and(
+            eq(activityLog.userId, memberUserId),
+            eq(activityLog.contentType, this.config.contentType),
+            eq(gamificationContent.isActive, true),
+          ),
         )
         .groupBy(activityLog.contentId),
     ]);

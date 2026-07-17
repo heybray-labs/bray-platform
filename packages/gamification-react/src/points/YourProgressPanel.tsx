@@ -31,6 +31,15 @@ type YourProgressPanelProps = {
   className?: string;
   activeCategorySlugs?: string[];
   onCategorySelect?: (slug: string) => void;
+  /**
+   * Content type this panel's mastery axis represents. Hosts with multiple
+   * content types can mount one panel per type once `/me/stats` grows a
+   * contentType query; today the server returns the default content type's
+   * mastery (single-type back-compat).
+   */
+  contentType?: string;
+  /** Override the "Category mastery" section label (e.g. "Topic mastery"). */
+  masteryDimensionLabel?: string;
 };
 
 function userDisplayName(user: ReturnType<typeof useAuth>["user"]) {
@@ -106,6 +115,8 @@ export function YourProgressPanel({
   className,
   activeCategorySlugs = [],
   onCategorySelect,
+  contentType: _contentType,
+  masteryDimensionLabel = "Category mastery",
 }: YourProgressPanelProps) {
   const { user } = useAuth();
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -190,7 +201,7 @@ export function YourProgressPanel({
             {masteryRows.length > 0 && (
               <div>
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                  Category mastery
+                  {masteryDimensionLabel}
                 </h3>
                 <div className="space-y-3">
                   {masteryRows.map((row) => {

@@ -24,16 +24,31 @@ import {
   type RewardTier,
   type RewardTierInput,
 } from "./schema/index.ts";
+import {
+  assertMasteryDimensionsResolvable,
+  resolveMasteryDimension,
+} from "./resolve-mastery.ts";
+
+export {
+  assertMasteryDimensionsResolvable,
+  listMasteryDimensionSlugs,
+  resolveMasteryDimension,
+} from "./resolve-mastery.ts";
 
 export interface GamificationContentType {
   type: string;
   label: string;
+  /** Preferred mastery/leaderboard/star-map axis for this content type. */
+  masteryDimensionSlug?: string;
 }
 
 export interface GamificationConfig {
   contentTypes: GamificationContentType[];
-  /** Classification dimension used for mastery/category leaderboards (Scenarios: "category"). */
-  masteryDimensionSlug: string;
+  /**
+   * @deprecated Prefer `contentTypes[].masteryDimensionSlug`.
+   * Fallback when a contentTypes entry omits its own slug (single-type apps).
+   */
+  masteryDimensionSlug?: string;
   managePermission: string;
   tierDefaults?: RewardTierInput[];
 }
@@ -113,7 +128,18 @@ export class GamificationService {
   private readonly contentTypeList: string[];
 
   constructor(private readonly config: GamificationConfig) {
+    assertMasteryDimensionsResolvable(config);
     this.contentTypeList = config.contentTypes.map((c) => c.type);
+  }
+
+  /** Mastery dimension for a content type (per-entry or top-level fallback). */
+  masteryDimensionFor(contentType: string): string {
+    return resolveMasteryDimension(this.config, contentType);
+  }
+
+  /** Default content type when callers omit one (sole registered type, else first). */
+  defaultContentType(): string {
+    return this.contentTypeList[0]!;
   }
 
   // ---- reward tiers ---------------------------------------------------------
@@ -473,7 +499,10 @@ export class GamificationService {
       cursor = this.addWeeks(cursor, -1);
     }
 
-    const categoryMastery = await this.getMasteryRankings(userId);
+    const categoryMastery = await this.getMasteryRankings(
+      userId,
+      this.defaultContentType(),
+    );
 
     return {
       totalPoints,
@@ -487,7 +516,15 @@ export class GamificationService {
     };
   }
 
-  async getMasteryRankings(userId: number) {
+  /**
+   * Mastery rankings for one content type's mastery dimension.
+   * When `contentType` is omitted, uses the sole/first registered content type
+   * (back-compat for single-type apps).
+   */
+  async getMasteryRankings(userId: number, contentType?: string) {
+    const resolvedType = contentType ?? this.defaultContentType();
+    const dimensionSlug = this.masteryDimensionFor(resolvedType);
+
     const categoryRows = await db
       .select({
         slug: classificationOptions.slug,
@@ -513,7 +550,8 @@ export class GamificationService {
       .where(
         and(
           eq(gamificationContent.isActive, true),
-          eq(classificationDimensions.slug, this.config.masteryDimensionSlug),
+          eq(gamificationContent.contentType, resolvedType),
+          eq(classificationDimensions.slug, dimensionSlug),
         ),
       );
 
@@ -534,6 +572,7 @@ export class GamificationService {
       .where(
         and(
           eq(userContentTierAwards.userId, userId),
+          eq(userContentTierAwards.contentType, resolvedType),
           eq(gamificationContent.isActive, true),
           sql`${rewardTiers.starLevel} >= 1`,
         ),
@@ -573,7 +612,7 @@ export class GamificationService {
       )
       .where(
         and(
-          eq(classificationDimensions.slug, this.config.masteryDimensionSlug),
+          eq(classificationDimensions.slug, dimensionSlug),
           eq(classificationOptions.isActive, true),
         ),
       )
@@ -828,6 +867,8 @@ export class GamificationService {
 
   async getLeaderboard(options: {
     scope: "global" | "dimension-option";
+    /** Taxonomy dimension for dimension-option scope (resolved by the router). */
+    dimensionSlug?: string;
     optionSlug?: string;
     period: "all_time" | "month";
     limit?: number;
@@ -852,6 +893,7 @@ export class GamificationService {
 
   private async queryLeaderboardEntries(options: {
     scope: "global" | "dimension-option";
+    dimensionSlug?: string;
     optionSlug?: string;
     period: "all_time" | "month";
     limit: number;
@@ -867,6 +909,10 @@ export class GamificationService {
       }
 
       const optionSlug = options.optionSlug.trim();
+      const dimensionSlug =
+        options.dimensionSlug ??
+        this.config.masteryDimensionSlug ??
+        this.masteryDimensionFor(this.defaultContentType());
 
       const rows = await db
         .select({
@@ -894,7 +940,7 @@ export class GamificationService {
         .innerJoin(users, eq(pointTransactions.userId, users.id))
         .where(
           and(
-            eq(classificationDimensions.slug, this.config.masteryDimensionSlug),
+            eq(classificationDimensions.slug, dimensionSlug),
             eq(classificationOptions.slug, optionSlug),
             periodFilter,
           ),
@@ -937,6 +983,7 @@ export class GamificationService {
 
   private async getCurrentUserLeaderboardEntry(options: {
     scope: "global" | "dimension-option";
+    dimensionSlug?: string;
     optionSlug?: string;
     period: "all_time" | "month";
     currentUserId?: number;
@@ -952,7 +999,10 @@ export class GamificationService {
     if (options.scope === "dimension-option") {
       if (!options.optionSlug?.trim()) return null;
       const optionSlug = options.optionSlug.trim();
-      const dimensionSlug = this.config.masteryDimensionSlug;
+      const dimensionSlug =
+        options.dimensionSlug ??
+        this.config.masteryDimensionSlug ??
+        this.masteryDimensionFor(this.defaultContentType());
 
       const [userRow] = await db
         .select({

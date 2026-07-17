@@ -7,6 +7,7 @@ import { Router, Response, type RequestHandler } from "express";
 import { authenticateToken, requirePasswordChanged, type AuthRequest } from "@heybray/identity";
 import { createLogger } from "@heybray/server-kit";
 import { GamificationService, type GamificationConfig } from "./service.ts";
+import { listMasteryDimensionSlugs } from "./resolve-mastery.ts";
 
 const log = createLogger("gamification");
 
@@ -21,27 +22,54 @@ export interface GamificationRouterOptions {
   leaderboardMiddleware?: RequestHandler[];
 }
 
+export type ResolvedLeaderboardScope = {
+  mode: "global" | "dimension-option";
+  /** Present when mode is dimension-option — the taxonomy dimension to filter on. */
+  dimensionSlug?: string;
+};
+
 /**
  * Builds the /api/points routes (same paths as the app's legacy points router).
- * Leaderboard scope accepts the legacy `category` token, the configured mastery
+ * Leaderboard scope accepts the legacy `category` token, any registered mastery
  * dimension slug (e.g. `topic`), or `dimension-option` — all map to the
  * service's generic dimension-option scope + option slug query param.
+ *
+ * `masteryDimensionSlugs` may be a single string (legacy callers) or the full
+ * list from `listMasteryDimensionSlugs(config)`.
  */
 export function resolveLeaderboardScope(
   queryScope: unknown,
-  masteryDimensionSlug: string,
-): "global" | "dimension-option" {
+  masteryDimensionSlugs: string | string[],
+): ResolvedLeaderboardScope {
+  const slugs = (
+    Array.isArray(masteryDimensionSlugs) ? masteryDimensionSlugs : [masteryDimensionSlugs]
+  ).filter(Boolean);
+
   if (queryScope == null || queryScope === "" || queryScope === "global") {
-    return "global";
+    return { mode: "global" };
   }
-  if (
-    queryScope === "category" ||
-    queryScope === masteryDimensionSlug ||
-    queryScope === "dimension-option"
-  ) {
-    return "dimension-option";
+
+  if (queryScope === "dimension-option") {
+    return { mode: "dimension-option", dimensionSlug: slugs[0] };
   }
-  return "global";
+
+  if (typeof queryScope === "string" && slugs.includes(queryScope)) {
+    return { mode: "dimension-option", dimensionSlug: queryScope };
+  }
+
+  // Legacy token: if "category" is a registered dimension use it; otherwise
+  // fall back to the sole/first registered dimension (preserves Flashcards
+  // tests that still call ?scope=category with a topic-backed config).
+  if (queryScope === "category") {
+    if (slugs.includes("category")) {
+      return { mode: "dimension-option", dimensionSlug: "category" };
+    }
+    if (slugs.length >= 1) {
+      return { mode: "dimension-option", dimensionSlug: slugs[0] };
+    }
+  }
+
+  return { mode: "global" };
 }
 
 export function createGamificationRouter(
@@ -50,6 +78,7 @@ export function createGamificationRouter(
 ): Router {
   const service = new GamificationService(config);
   const router = Router();
+  const masterySlugs = listMasteryDimensionSlugs(config);
 
   router.use(authenticateToken);
   router.use(requirePasswordChanged);
@@ -102,14 +131,15 @@ export function createGamificationRouter(
 
   router.get("/leaderboard", ...(options.leaderboardMiddleware ?? []), async (req: AuthRequest, res: Response) => {
     try {
-      const scope = resolveLeaderboardScope(req.query.scope, config.masteryDimensionSlug);
+      const resolved = resolveLeaderboardScope(req.query.scope, masterySlugs);
       const period = req.query.period === "month" ? "month" : "all_time";
       const optionSlug =
         typeof req.query.category === "string" ? req.query.category : undefined;
       const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : 20;
 
       const result = await service.getLeaderboard({
-        scope,
+        scope: resolved.mode,
+        dimensionSlug: resolved.dimensionSlug,
         optionSlug,
         period,
         limit,
