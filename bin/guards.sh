@@ -19,10 +19,14 @@ if grep -rn --include='*.ts' --include='*.tsx' \
   fail "deep import into node_modules/@heybray — use the package's public exports"
 fi
 
-# 3. Scenarios vocabulary gate (see CONTRIBUTING.md)
+# 3. no tsconfig paths into sibling repos (tsx resolves them instead of node_modules/yalc)
+./bin/check-no-sibling-tsconfig-paths.sh || \
+  fail "tsconfig paths reference sibling repo — resolve @heybray/* via node_modules only"
+
+# 4. Scenarios vocabulary gate (see CONTRIBUTING.md)
 ./bin/check-scenarios-vocabulary.sh
 
-# 4. package-boundary gate — packages must not import app-shell paths
+# 5. package-boundary gate — packages must not import app-shell paths
 if grep -rn --include='*.ts' --include='*.tsx' \
      -e '@shared' \
      packages/*/src >/dev/null 2>&1; then
