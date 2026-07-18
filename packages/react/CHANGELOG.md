@@ -1,5 +1,13 @@
 # @heybray/react
 
+## 1.2.1
+
+### Patch Changes
+
+- fe6463e: Disable default reconnect refetch on the shared query client (`refetchOnReconnect: false`) and stabilize `AuthProvider` context value with `useMemo`.
+- Updated dependencies [537e74c]
+  - @heybray/ui@1.1.0
+
 ## 1.2.0
 
 ### Minor Changes
