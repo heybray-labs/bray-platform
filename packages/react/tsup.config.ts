@@ -4,6 +4,7 @@ import { defineConfig } from "tsup";
 function entriesFor(dir: string, ext: string) {
   const entries: Record<string, string> = {};
   for (const file of globSync(`src/${dir}/*.${ext}`)) {
+    if (file.includes(".test.")) continue;
     const name = file.split("/").pop()!.replace(new RegExp(`\\.${ext}$`), "");
     entries[`${dir}/${name}`] = file;
   }

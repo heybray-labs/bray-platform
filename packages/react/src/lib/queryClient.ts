@@ -6,6 +6,41 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 import { HttpError } from "./http-error";
 
+/**
+ * Shared query defaults for all Bray apps:
+ * - `staleTime: 30_000` — remounts within 30s reuse cache (opt out per query when freshness matters)
+ * - `refetchOnWindowFocus: false` — opt in per query if a screen needs focus-freshness
+ * - `retry: false` — never auto-retry (including 401/429)
+ *
+ * Session expiry: the first 401 from `apiRequest` / the default queryFn clears the
+ * session and redirects to `/login` exactly once (module latch). Call
+ * `resetSessionExpiryLatch()` after a successful login so a later expiry can redirect again.
+ */
+
+/** Module latch: one login redirect per session-expiry event. */
+let sessionExpiryHandled = false;
+
+/** @internal exported for tests */
+export function isSessionExpiryHandled(): boolean {
+  return sessionExpiryHandled;
+}
+
+/** Reset after a successful login / register / SSO complete so the next expiry can redirect. */
+export function resetSessionExpiryLatch(): void {
+  sessionExpiryHandled = false;
+}
+
+function handleUnauthorized(url: string): void {
+  if (url.includes("/auth/login")) return;
+  if (sessionExpiryHandled) return;
+  sessionExpiryHandled = true;
+  localStorage.removeItem("auth_token");
+  localStorage.removeItem("auth_user");
+  if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+    window.location.href = "/login";
+  }
+}
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -37,12 +72,8 @@ export async function apiRequest(
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  if (res.status === 401 && !url.includes("/auth/login")) {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("auth_user");
-    if (!window.location.pathname.startsWith("/login")) {
-      window.location.href = "/login";
-    }
+  if (res.status === 401) {
+    handleUnauthorized(url);
   }
 
   await throwIfResNotOk(res);
@@ -66,7 +97,10 @@ export const getQueryFn =
     if (token) headers.Authorization = `Bearer ${token}`;
 
     const res = await fetch(url, { headers });
-    if (on401 === "returnNull" && res.status === 401) return null;
+    if (res.status === 401) {
+      if (on401 === "returnNull") return null;
+      handleUnauthorized(url);
+    }
     await throwIfResNotOk(res);
     const raw = await res.text();
     if (!raw.trim()) return null;
@@ -77,6 +111,7 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
+      staleTime: 30_000,
       refetchOnWindowFocus: false,
       retry: false,
       throwOnError: (error) => {

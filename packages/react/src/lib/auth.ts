@@ -3,7 +3,7 @@
  * Copyright (C) 2026 Heybray
  */
 
-import { apiRequest } from "./queryClient";
+import { apiRequest, resetSessionExpiryLatch } from "./queryClient";
 import type {
   LoginCredentials,
   SetupAdminCredentials,
@@ -22,6 +22,13 @@ export interface AuthResponse {
 export class AuthService {
   private static readonly TOKEN_KEY = "auth_token";
   private static readonly USER_KEY = "auth_user";
+
+  private static persistSession(data: AuthResponse): AuthResponse {
+    resetSessionExpiryLatch();
+    localStorage.setItem(this.TOKEN_KEY, data.token);
+    localStorage.setItem(this.USER_KEY, JSON.stringify(data.user));
+    return data;
+  }
 
   static isMisconfigured(config: AuthConfig): boolean {
     if (config.misconfigured) {
@@ -48,9 +55,7 @@ export class AuthService {
 
   static async completeSsoLogin(code: string): Promise<AuthResponse> {
     const data = await apiRequest("POST", "/api/auth/sso/complete", { code });
-    localStorage.setItem(this.TOKEN_KEY, data.token);
-    localStorage.setItem(this.USER_KEY, JSON.stringify(data.user));
-    return data as AuthResponse;
+    return this.persistSession(data as AuthResponse);
   }
 
   static async completeOidcLogin(code: string): Promise<AuthResponse> {
@@ -59,9 +64,7 @@ export class AuthService {
 
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const data = await apiRequest("POST", "/api/auth/login", credentials);
-    localStorage.setItem(this.TOKEN_KEY, data.token);
-    localStorage.setItem(this.USER_KEY, JSON.stringify(data.user));
-    return data as AuthResponse;
+    return this.persistSession(data as AuthResponse);
   }
 
   static async getSetupStatus(): Promise<{ needsSetup: boolean; hasPasswordUsers: boolean }> {
@@ -70,9 +73,7 @@ export class AuthService {
 
   static async setupAdmin(credentials: SetupAdminCredentials): Promise<AuthResponse> {
     const data = await apiRequest("POST", "/api/auth/setup-admin", credentials);
-    localStorage.setItem(this.TOKEN_KEY, data.token);
-    localStorage.setItem(this.USER_KEY, JSON.stringify(data.user));
-    return data as AuthResponse;
+    return this.persistSession(data as AuthResponse);
   }
 
   static async register(payload: {
@@ -81,9 +82,7 @@ export class AuthService {
     firstName?: string;
   }): Promise<AuthResponse> {
     const data = await apiRequest("POST", "/api/auth/register", payload);
-    localStorage.setItem(this.TOKEN_KEY, data.token);
-    localStorage.setItem(this.USER_KEY, JSON.stringify(data.user));
-    return data as AuthResponse;
+    return this.persistSession(data as AuthResponse);
   }
 
   static async validateToken(): Promise<UserWithRole | null> {
