@@ -63,6 +63,10 @@ Implementation: `grep -rni 'scenario\|roleplay' packages/*/src` with an allowlis
 Any other match fails the gate. Neutral replacements (`content-history`, `detachedCount`,
 `ContentListRowComponent`, etc.) are required for new code.
 
+These gates (and the package-boundary checks in `bin/guards.sh`) run automatically in CI
+via the org **`guards`** job — not only when contributors remember to run the script
+manually.
+
 ## Publishing to npm
 
 CI publishes via `.github/workflows/release.yml` when a "Version Packages" PR merges to `main`.
