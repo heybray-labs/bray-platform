@@ -81,26 +81,77 @@ npx changeset publish
 
 Requires `npm whoami` to return `brayg` (or another maintainer on the `@heybray` packages).
 
-## Cross-repo UI batch (yalc)
+## Cross-repo development workflow
 
-When extracting shared gamification UI during a review batch (client-side dedupe only):
+How changes flow between the app repos (`bray-scenarios`, `bray-flashcards`, `bray-premium`)
+and `bray-platform`. Canonical copy also lives in `bray-scenarios/docs/dev-workflow.md`.
 
-1. Work on a **`platform/gamification-ui-batch`** branch in `bray-platform`.
-2. Add a **changeset per logical change** (`npx changeset add`) — one publish at batch end, itemized changelog.
-3. Local loop in consumer repos (`bray-scenarios`, `bray-flashcards`, `bray-premium`):
+### The invariant
 
-   ```bash
-   # platform — after each change
-   npm run build --workspace=@heybray/gamification-react
-   yalc publish --push --changed   # or: cd packages/gamification-react && yalc push
+**A consumer repo's `main` only ever points at published `@heybray/*` versions.** Local bridges
+(yalc) are a workbench state, never a committed state. Fresh-clone CI is the enforcement: it can
+only resolve what npm can resolve.
 
-   # consumer — once per branch
-   yalc add @heybray/gamification-react @heybray/react   # when react config changes too
-   npm install
-   ```
+### The two loops
 
-4. **Do not commit** yalc `file:.yalc/...` entries. CI runs `./bin/check-no-yalc.sh` in each repo.
-5. Before publish: verify consumers against **`npm pack` tarballs**, not only yalc.
-6. Publish platform once → `yalc remove` in consumers → bump pinned npm versions together.
+**Inner loop (minutes, local only)** — while platform code is in flux:
 
-Batch scope: client-side UI dedupe only (~1 week). No API/schema changes in the batch.
+```bash
+# in bray-platform, after editing a package:
+npm run build --workspace=@heybray/<pkg>
+yalc publish packages/<pkg>                  # or: yalc push
+
+# in the consumer repo (once per machine/branch):
+yalc add @heybray/<pkg> && npm install
+# iterate: edit → build → yalc push → consumer picks up the copy in place
+```
+
+**Outer loop (when the change is right)**:
+
+1. PR into `bray-platform` — **every change carries its own changeset** in the same PR.
+2. Merge → changesets opens/updates the "Version Packages" PR → merging that publishes to npm
+   via CI (provenance attested). No manual publishes.
+3. Consumer branch: `yalc remove @heybray/<pkg> && npm install`, bump the pin to the published
+   version, land the consumer PR.
+
+Why yalc and not the alternatives:
+
+| Option | Verdict |
+|---|---|
+| **yalc** | ✅ Copies built output the way npm would — same layout, no symlinks. |
+| `npm link` | ❌ Symlinks can load two instances of one package; module-level singletons split silently. |
+| `file:../bray-platform/...` | ❌ Rewrites package.json/lockfile with paths that must never merge. |
+| Deep imports (`node_modules/@heybray/*/src/...`) | ❌ Bypasses the exports contract entirely. |
+| Copying into `node_modules` | ❌ Obviously. |
+
+### Guard rails (mechanical, not aspirational)
+
+- `.yalc/` and `yalc.lock` are gitignored in every consumer repo — **but note `yalc add` also
+  rewrites `package.json`** with a `file:.yalc/...` dependency, and package.json is tracked.
+  Therefore every consumer's CI (and its local test script) greps **`package.json` +
+  `package-lock.json`** for yalc paths and **fails on any hit** (`./bin/check-no-yalc.sh`).
+- After `yalc remove`, always `npm install` to restore the lockfile before committing — `yalc
+  remove` alone leaves lockfile entries and broken symlinks behind.
+- **Consumer commits that adopt an unpublished platform API never merge to `main`** — they wait
+  on the adoption branch until the batch publishes, then land with the pin bump in one commit.
+  Merging early breaks fresh clones even with clean manifests (the import target does not exist on
+  npm).
+- A consumer **shim duplicating an unpublished platform component** is an exception with a hard
+  expiry (deleted the same day the batch publishes), never a pattern. If a shim is being
+  considered, first ask whether the batch should simply publish now — "ship what's green" usually
+  wins.
+
+### Batched platform work
+
+When a review pass produces several related platform changes (e.g. client UI dedupe), don't publish
+per tweak:
+
+- Accumulate on a short-lived feature branch. **Each item still lands with its own changeset
+  file** — changesets accumulate and the eventual merge produces ONE Version Packages PR / one
+  publish with an itemized changelog.
+- Consumers ride yalc against the batch branch during the batch.
+- **Scope bound**: one concern class per batch (e.g. client-side UI dedupe only). **Time bound**:
+  ~a week; if still open, publish what's green and start a new batch.
+- **Final verification before publish is against packed tarballs** (`npm pack` install or an RC),
+  not yalc — yalc green is necessary, not sufficient.
+- Batch ends with coordinated consumer pin bumps landing promptly in all three apps.
