@@ -38,10 +38,12 @@
     "./tailwind-preset": {
       "types": "./dist/tailwind-preset.d.ts",
       "default": "./dist/tailwind-preset.js"
-    }
+    },
+    "./theme-default.css": "./src/theme-default.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "src/theme-default.css"
   ],
   "dependencies": {
     "date-fns": "^2.30.0"

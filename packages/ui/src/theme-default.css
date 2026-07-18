@@ -1,0 +1,73 @@
+/*
+ * SPDX-License-Identifier: AGPL-3.0-only
+ * Copyright (C) 2026 Heybray
+ *
+ * Default Bray pink theme baseline. Apps import this and override :root locally:
+ *   @import "@heybray/ui/theme-default.css";
+ */
+
+:root {
+  /* Core shadcn semantic tokens — Bray Pink */
+  --background: hsl(340, 20%, 99%);
+  --foreground: hsl(218, 54%, 20%);
+  --muted: hsl(340, 14%, 96%);
+  --muted-foreground: hsl(215, 13%, 44%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(218, 54%, 20%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(218, 54%, 20%);
+  --border: hsl(340, 12%, 89%);
+  --input: hsl(340, 12%, 89%);
+  --primary: hsl(330, 65%, 55%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(340, 14%, 96%);
+  --secondary-foreground: hsl(218, 54%, 20%);
+  --accent: hsl(330, 65%, 93%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(354, 82%, 56%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --ring: hsl(330, 65%, 55%);
+  --radius: 0.1875rem;
+  --success: hsl(151, 55%, 41%);
+  --warning: hsl(35, 100%, 58%);
+  --info: hsl(330, 65%, 55%);
+
+  /* Bray brand */
+  --bray-pink: hsl(330, 65%, 55%);
+  --bray-pink-light: hsl(330, 65%, 96%);
+  --bray-grey-subtle: hsl(340, 14%, 96%);
+  --bray-grey-medium: hsl(215, 13%, 44%);
+  --bray-elevation-shadow: 0 1px 1px rgba(66, 9, 36, 0.25);
+  --bray-elevation-shadow-raised: 0 4px 8px -2px rgba(66, 9, 36, 0.25), 0 0 1px rgba(66, 9, 36, 0.31);
+
+  /* Navigation chrome */
+  --nav-header-bg: #ffe4f8;
+  --nav-sidebar-bg: #e8e0e3;
+  --nav-bar-bg: #ffd6e7;
+
+  /* Difficulty levels */
+  --difficulty-easy: #059669;
+  --difficulty-medium: #0284c7;
+  --difficulty-hard: #ea580c;
+
+  /* Rank / podium */
+  --rank-gold: #ca8a04;
+  --rank-silver: #64748b;
+  --rank-bronze: #b45309;
+
+  /* Status pills */
+  --status-fail: #e11d48;
+  --status-neutral: #475569;
+
+  /* Featured / points accents */
+  --featured-star: #f59e0b;
+  --featured-star-fill: #fbbf24;
+  --points-value: #d97706;
+
+  /* Rewards points pill */
+  --rewards-banner-bg: #fffbeb;
+  --rewards-banner-border: #fde68a;
+  --rewards-banner-hover: #fef3c7;
+  --rewards-banner-text: #78350f;
+  --rewards-banner-label: #b45309;
+}

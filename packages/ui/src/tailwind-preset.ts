@@ -10,6 +10,9 @@ import type { Config } from "tailwindcss";
  * Shared design-system Tailwind preset. Tokens are CSS-variable driven so an app
  * whitelabels purely by overriding the `:root` variable block in its own CSS.
  * Apps compose this via `presets: [uiPreset]` and supply their own `content`.
+ *
+ * Default token values ship in `@heybray/ui/theme-default.css` — import that file
+ * in the app stylesheet and add optional local `:root` overrides below the import.
  */
 export const uiPreset = {
   darkMode: ["class"],
