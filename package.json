@@ -35,5 +35,8 @@
     "tsup": "^8.5.1",
     "turbo": "^2.5.8",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "_guards_plant_yalc": "file:.yalc/@heybray/plant"
   }
 }
