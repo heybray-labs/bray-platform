@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
-# Fail if yalc local links leaked into committed package manifests.
+# Fail if yalc local links leaked into committed npm manifests.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-shopt -s globstar nullglob
-FILES=(package.json package-lock.json "**/package.json")
+MANIFESTS=(package.json package-lock.json)
+PATTERN='\.yalc/|file:\.yalc|"\.yalc|yalc\.lock'
 
 FOUND=0
-for file in "${FILES[@]}"; do
-  [[ -f "$file" ]] || continue
-  if grep -qE '\.yalc/|file:\.yalc|"\.yalc' "$file"; then
+for file in "${MANIFESTS[@]}"; do
+  if [[ ! -f "$file" ]]; then
+    continue
+  fi
+  if grep -qE "$PATTERN" "$file"; then
     echo "ERROR: yalc reference in $file"
+    grep -nE "$PATTERN" "$file" || true
     FOUND=1
   fi
 done

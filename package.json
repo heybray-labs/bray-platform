@@ -22,6 +22,7 @@
     "typecheck": "turbo run typecheck",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "test": "./bin/test.sh",
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "changeset publish"
