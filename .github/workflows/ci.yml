@@ -17,7 +17,9 @@ jobs:
   guards:
     uses: heybray-labs/.github/.github/workflows/guards.yml@main
     with:
-      changesets: true
+      # Version Packages PRs bump versions / consume changesets — skip the
+      # "changeset present" gate for that branch (org workflow also skips it).
+      changesets: ${{ github.event_name != 'pull_request' || github.head_ref != 'changeset-release/main' }}
 
   verify:
     name: verify
