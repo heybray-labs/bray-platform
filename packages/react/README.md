@@ -10,6 +10,7 @@ The shared `queryClient` (`@heybray/react/lib/queryClient`) sets:
 |---|---|---|
 | `staleTime` | `30_000` | Remounts within 30s reuse cache. Override per query when freshness matters. |
 | `refetchOnWindowFocus` | `false` | Opt a query back in with `refetchOnWindowFocus: true` when a screen needs focus-freshness (mutations already invalidate the main “my points changed” paths). |
+| `refetchOnReconnect` | `false` | Opt in per query when a screen must refresh after the browser goes back online. |
 | `retry` | `false` | Never auto-retry, including 401/429. |
 
 ## Session-expiry latch

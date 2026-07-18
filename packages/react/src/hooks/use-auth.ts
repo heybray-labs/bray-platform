@@ -10,6 +10,7 @@ import {
   useEffect,
   useCallback,
   useContext,
+  useMemo,
   type ReactNode,
 } from "react";
 import { AuthService, type AuthResponse } from "../lib/auth.ts";
@@ -112,19 +113,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return validated;
   }, []);
 
-  const value: AuthContextValue = {
-    user,
-    isAuthenticated: !!user,
-    isLoading,
-    isLoggingIn,
-    login,
-    setupAdmin,
-    changePassword,
-    logout,
-    hasPermission,
-    hasRole,
-    refreshUser,
-  };
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      user,
+      isAuthenticated: !!user,
+      isLoading,
+      isLoggingIn,
+      login,
+      setupAdmin,
+      changePassword,
+      logout,
+      hasPermission,
+      hasRole,
+      refreshUser,
+    }),
+    [
+      user,
+      isLoading,
+      isLoggingIn,
+      login,
+      setupAdmin,
+      changePassword,
+      logout,
+      hasPermission,
+      hasRole,
+      refreshUser,
+    ],
+  );
 
   return createElement(AuthContext.Provider, { value }, children);
 }

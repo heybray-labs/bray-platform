@@ -7,8 +7,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   apiRequest,
   isSessionExpiryHandled,
+  queryClient,
   resetSessionExpiryLatch,
 } from "./queryClient";
+
+describe("queryClient defaults", () => {
+  it("disables reconnect and focus refetch by default", () => {
+    const queries = queryClient.getDefaultOptions().queries!;
+    expect(queries.staleTime).toBe(30_000);
+    expect(queries.refetchOnWindowFocus).toBe(false);
+    expect(queries.refetchOnReconnect).toBe(false);
+    expect(queries.retry).toBe(false);
+  });
+});
 
 describe("session expiry latch", () => {
   const hrefSets: string[] = [];

@@ -10,6 +10,7 @@ import { HttpError } from "./http-error";
  * Shared query defaults for all Bray apps:
  * - `staleTime: 30_000` — remounts within 30s reuse cache (opt out per query when freshness matters)
  * - `refetchOnWindowFocus: false` — opt in per query if a screen needs focus-freshness
+ * - `refetchOnReconnect: false` — opt in per query; avoids reconnect storms when cache is warm
  * - `retry: false` — never auto-retry (including 401/429)
  *
  * Session expiry: the first 401 from `apiRequest` / the default queryFn clears the
@@ -113,6 +114,7 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       staleTime: 30_000,
       refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
       retry: false,
       throwOnError: (error) => {
         if (error instanceof HttpError) {
