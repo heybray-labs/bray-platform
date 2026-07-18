@@ -1,6 +1,6 @@
 {
   "name": "@heybray/gamification-react",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "license": "AGPL-3.0-only",
   "repository": {
@@ -66,7 +66,7 @@
   ],
   "dependencies": {
     "@heybray/gamification": "^1.1.0",
-    "@heybray/react": "^1.0.0",
+    "@heybray/react": "^1.1.0",
     "@heybray/ui": "^1.0.0"
   },
   "peerDependencies": {

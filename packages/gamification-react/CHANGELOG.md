@@ -1,5 +1,16 @@
 # @heybray/gamification-react
 
+## 1.2.0
+
+### Minor Changes
+
+- 79c67c6: Add `GamificationNavActions` for shared navbar points summary and star map link. Extend `AppConfig.routes.teamStarMapPath` for host routing.
+
+### Patch Changes
+
+- Updated dependencies [79c67c6]
+  - @heybray/react@1.1.0
+
 ## 1.1.0
 
 ### Minor Changes

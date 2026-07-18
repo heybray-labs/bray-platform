@@ -80,3 +80,27 @@ npx changeset publish
 ```
 
 Requires `npm whoami` to return `brayg` (or another maintainer on the `@heybray` packages).
+
+## Cross-repo UI batch (yalc)
+
+When extracting shared gamification UI during a review batch (client-side dedupe only):
+
+1. Work on a **`platform/gamification-ui-batch`** branch in `bray-platform`.
+2. Add a **changeset per logical change** (`npx changeset add`) — one publish at batch end, itemized changelog.
+3. Local loop in consumer repos (`bray-scenarios`, `bray-flashcards`, `bray-premium`):
+
+   ```bash
+   # platform — after each change
+   npm run build --workspace=@heybray/gamification-react
+   yalc publish --push --changed   # or: cd packages/gamification-react && yalc push
+
+   # consumer — once per branch
+   yalc add @heybray/gamification-react @heybray/react   # when react config changes too
+   npm install
+   ```
+
+4. **Do not commit** yalc `file:.yalc/...` entries. CI runs `./bin/check-no-yalc.sh` in each repo.
+5. Before publish: verify consumers against **`npm pack` tarballs**, not only yalc.
+6. Publish platform once → `yalc remove` in consumers → bump pinned npm versions together.
+
+Batch scope: client-side UI dedupe only (~1 week). No API/schema changes in the batch.
