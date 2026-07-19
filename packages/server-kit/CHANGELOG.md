@@ -1,5 +1,11 @@
 # @heybray/server-kit
 
+## 1.1.1
+
+### Patch Changes
+
+- 0a98883: Update SPDX copyright year range to 2025-2026.
+
 ## 1.1.0
 
 ### Minor Changes

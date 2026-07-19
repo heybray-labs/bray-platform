@@ -1,5 +1,15 @@
 # @heybray/gamification-react
 
+## 1.2.3
+
+### Patch Changes
+
+- 0a98883: Update SPDX copyright year range to 2025-2026.
+- Updated dependencies [0a98883]
+  - @heybray/gamification@1.1.3
+  - @heybray/react@1.2.4
+  - @heybray/ui@1.2.2
+
 ## 1.2.2
 
 ### Patch Changes

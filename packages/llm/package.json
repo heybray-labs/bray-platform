@@ -1,6 +1,6 @@
 {
   "name": "@heybray/llm",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "build": "tsup",
@@ -14,7 +14,7 @@
     }
   },
   "dependencies": {
-    "@heybray/server-kit": "^1.0.0",
+    "@heybray/server-kit": "^1.1.1",
     "@langchain/anthropic": "^1.5.1",
     "@langchain/core": "^1.2.1",
     "@langchain/google-genai": "^2.2.0",

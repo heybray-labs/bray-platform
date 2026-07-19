@@ -1,5 +1,13 @@
 # @heybray/llm
 
+## 1.0.1
+
+### Patch Changes
+
+- 0a98883: Update SPDX copyright year range to 2025-2026.
+- Updated dependencies [0a98883]
+  - @heybray/server-kit@1.1.1
+
 ## 1.0.0
 
 ### Major Changes

@@ -1,6 +1,6 @@
 {
   "name": "@heybray/identity",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "build": "tsup",
@@ -18,7 +18,7 @@
     }
   },
   "dependencies": {
-    "@heybray/server-kit": "^1.0.0",
+    "@heybray/server-kit": "^1.1.1",
     "@node-saml/node-saml": "^5.1.0",
     "bcrypt": "^6.0.0",
     "drizzle-orm": "^0.45.2",

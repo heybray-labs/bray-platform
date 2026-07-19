@@ -1,6 +1,6 @@
 {
   "name": "@heybray/gamification",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "type": "module",
   "scripts": {
     "build": "tsup",
@@ -22,9 +22,9 @@
     }
   },
   "dependencies": {
-    "@heybray/identity": "^1.0.0",
-    "@heybray/server-kit": "^1.0.0",
-    "@heybray/taxonomy": "^1.0.0",
+    "@heybray/identity": "^1.0.1",
+    "@heybray/server-kit": "^1.1.1",
+    "@heybray/taxonomy": "^1.0.1",
     "drizzle-orm": "^0.45.2",
     "express": "^4.21.2",
     "zod": "^3.25.76"

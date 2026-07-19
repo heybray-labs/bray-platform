@@ -1,5 +1,15 @@
 # @heybray/gamification
 
+## 1.1.3
+
+### Patch Changes
+
+- 0a98883: Update SPDX copyright year range to 2025-2026.
+- Updated dependencies [0a98883]
+  - @heybray/identity@1.0.1
+  - @heybray/server-kit@1.1.1
+  - @heybray/taxonomy@1.0.1
+
 ## 1.1.2
 
 ### Patch Changes
