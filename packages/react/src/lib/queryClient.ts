@@ -71,6 +71,7 @@ export async function apiRequest(
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    cache: "no-store",
   });
 
   if (res.status === 401) {
@@ -97,7 +98,7 @@ export const getQueryFn =
     const headers: Record<string, string> = {};
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    const res = await fetch(url, { headers });
+    const res = await fetch(url, { headers, cache: "no-store" });
     if (res.status === 401) {
       if (on401 === "returnNull") return null;
       handleUnauthorized(url);

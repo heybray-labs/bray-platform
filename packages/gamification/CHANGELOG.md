@@ -1,5 +1,11 @@
 # @heybray/gamification
 
+## 1.1.1
+
+### Patch Changes
+
+- Global leaderboard accepts optional `contentType` query param; points history returns `contentType` per row; `LeaderboardPanel` and `PointsHistoryDialog` support multi-app deep links.
+
 ## 1.1.0
 
 ### Minor Changes
