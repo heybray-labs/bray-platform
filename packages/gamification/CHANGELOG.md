@@ -1,5 +1,11 @@
 # @heybray/gamification
 
+## 1.1.2
+
+### Patch Changes
+
+- a6169a8: Premium closeout: scope global leaderboard and points history by content type; disable browser fetch cache on shared apiRequest/queryFn to prevent 304 empty-body cache clobber after mutations.
+
 ## 1.1.1
 
 ### Patch Changes
