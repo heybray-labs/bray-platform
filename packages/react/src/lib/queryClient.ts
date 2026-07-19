@@ -4,6 +4,7 @@
  */
 
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { clearAuthenticatedImageCache } from "../hooks/authenticated-image-cache.ts";
 import { HttpError } from "./http-error";
 
 /**
@@ -37,6 +38,7 @@ function handleUnauthorized(url: string): void {
   sessionExpiryHandled = true;
   localStorage.removeItem("auth_token");
   localStorage.removeItem("auth_user");
+  clearAuthenticatedImageCache();
   if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
     window.location.href = "/login";
   }

@@ -4,6 +4,7 @@
  */
 
 import { apiRequest, resetSessionExpiryLatch } from "./queryClient";
+import { clearAuthenticatedImageCache } from "../hooks/authenticated-image-cache.ts";
 import type {
   LoginCredentials,
   SetupAdminCredentials,
@@ -129,5 +130,6 @@ export class AuthService {
   static clearAuthData(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
+    clearAuthenticatedImageCache();
   }
 }
