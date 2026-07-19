@@ -58,4 +58,4 @@ npm test            # recommended when touching react, server-kit, or gamificati
 ./bin/check-scenarios-vocabulary.sh
 ```
 
-Add a changeset when the change should publish (`npx changeset add`).
+Add a changeset when the change should publish (`npx changeset add`).  Or use npm run changeset.
