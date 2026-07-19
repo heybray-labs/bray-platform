@@ -1,0 +1,224 @@
+name: Release pipeline healthcheck
+
+# Surfaces a stuck release pipeline without someone having to notice manually:
+# pending changesets on main but no open Version Packages PR (and no successful
+# Release run since the last .changeset/ change), or a failed Release workflow run.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: release-healthcheck
+  cancel-in-progress: true
+
+jobs:
+  alert-on-release-failure:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open or update issue for failed Release workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            const title = "Release workflow failed";
+            const body = [
+              "The **Release** workflow run failed.",
+              "",
+              `- Run: ${run.html_url}`,
+              `- Commit: ${run.head_sha}`,
+              `- Event: ${run.event}`,
+              "",
+              "Check the run logs (npm auth, build, changesets/action). Re-run from the Actions tab or trigger **Release** via **workflow_dispatch** on `main` after fixing the root cause.",
+            ].join("\n");
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              per_page: 50,
+            });
+            const match = existing.find((i) => i.title === title);
+            if (match) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: match.number,
+                body: `Updated: another Release run failed.\n\n${body}`,
+              });
+              return;
+            }
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+            });
+
+  check-stuck-version-packages:
+    if: github.event_name != 'workflow_run'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Count pending changesets on main
+        id: pending
+        run: |
+          pending=0
+          for f in .changeset/*.md; do
+            [ -f "$f" ] || continue
+            base=$(basename "$f")
+            [ "$base" = "README.md" ] && continue
+            pending=$((pending + 1))
+          done
+          echo "count=$pending" >> "$GITHUB_OUTPUT"
+          echo "Pending changeset files on main: $pending"
+
+      - name: Skip when main has no pending changesets
+        if: steps.pending.outputs.count == '0'
+        run: echo "No pending changesets on main — nothing to check."
+
+      - name: Inspect Version Packages PR and Release runs
+        id: inspect
+        if: steps.pending.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          VP_JSON=$(gh pr list --head changeset-release/main --state open --json number,url --jq '.[0] // empty')
+          if [ -n "$VP_JSON" ]; then
+            echo "vp_pr_open=true" >> "$GITHUB_OUTPUT"
+            echo "vp_pr_url=$(echo "$VP_JSON" | jq -r .url)" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "vp_pr_open=false" >> "$GITHUB_OUTPUT"
+
+          CHANGESET_SHA=$(git log -1 --format=%H -- .changeset/)
+          CHANGESET_ISO=$(git log -1 --format=%cI -- .changeset/)
+          echo "changeset_sha=$CHANGESET_SHA" >> "$GITHUB_OUTPUT"
+          echo "changeset_iso=$CHANGESET_ISO" >> "$GITHUB_OUTPUT"
+
+          # Grace period: give push-triggered Release time to finish before alerting.
+          CHANGESET_EPOCH=$(date -d "$CHANGESET_ISO" +%s)
+          NOW_EPOCH=$(date -u +%s)
+          AGE_MIN=$(( (NOW_EPOCH - CHANGESET_EPOCH) / 60 ))
+          echo "changeset_age_min=$AGE_MIN" >> "$GITHUB_OUTPUT"
+          if [ "$AGE_MIN" -lt 30 ]; then
+            echo "within_grace=true" >> "$GITHUB_OUTPUT"
+            echo "Within ${AGE_MIN}m grace window (< 30m since last .changeset/ commit) — skip stuck alert."
+            exit 0
+          fi
+          echo "within_grace=false" >> "$GITHUB_OUTPUT"
+
+          RECENT_FAIL=$(gh run list --workflow=release.yml --branch=main --limit=5 \
+            --json conclusion,url \
+            --jq '[.[] | select(.conclusion=="failure")] | .[0].url // empty')
+          echo "recent_fail_url=$RECENT_FAIL" >> "$GITHUB_OUTPUT"
+
+          RUN_URL=$(gh run list --workflow=release.yml --branch=main --limit=20 \
+            --json conclusion,headSha,url \
+            --jq "[.[] | select(.conclusion==\"success\" and .headSha==\"$CHANGESET_SHA\")] | .[0].url // empty")
+          if [ -n "$RUN_URL" ]; then
+            echo "release_success_for_commit=true" >> "$GITHUB_OUTPUT"
+            echo "release_run_url=$RUN_URL" >> "$GITHUB_OUTPUT"
+          else
+            echo "release_success_for_commit=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open or update issue for stuck Version Packages pipeline
+        if: >-
+          steps.pending.outputs.count != '0' &&
+          steps.inspect.outputs.vp_pr_open == 'false' &&
+          steps.inspect.outputs.within_grace == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sha = "${{ steps.inspect.outputs.changeset_sha }}";
+            const ageMin = "${{ steps.inspect.outputs.changeset_age_min }}";
+            const pending = "${{ steps.pending.outputs.count }}";
+            const failUrl = "${{ steps.inspect.outputs.recent_fail_url }}";
+            const releaseUrl = "${{ steps.inspect.outputs.release_run_url }}";
+            const title = "Release pipeline stuck: pending changesets on main, no Version Packages PR";
+            const body = [
+              "`main` has **" + pending + "** pending changeset file(s) but no open **Version Packages** PR (`changeset-release/main`).",
+              "",
+              `- Last \`.changeset/\` commit: \`${sha}\` (${ageMin} minutes ago)`,
+              releaseUrl
+                ? `- Release workflow succeeded for that commit but no VP PR: ${releaseUrl}`
+                : "- No successful **Release** workflow run for that commit.",
+              failUrl ? `- Most recent failed Release run: ${failUrl}` : "",
+              "",
+              "**Recovery:**",
+              "1. Actions → **Release** → **Run workflow** (`workflow_dispatch`) on `main`.",
+              "2. Confirm a Version Packages PR appears.",
+              "3. If Release keeps failing, fix the root cause (see failed run logs) before merging consumers.",
+              "",
+              "This issue is opened/updated automatically by `.github/workflows/release-healthcheck.yml`.",
+            ].filter(Boolean).join("\n");
+
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              per_page: 50,
+            });
+            const match = existing.find((i) => i.title === title);
+            if (match) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: match.number,
+                body: `Healthcheck still failing (${new Date().toISOString()}):\n\n${body}`,
+              });
+              return;
+            }
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+            });
+
+      - name: Close resolved stuck-release issues
+        if: >-
+          steps.pending.outputs.count == '0' ||
+          steps.inspect.outputs.vp_pr_open == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = "Release pipeline stuck: pending changesets on main, no Version Packages PR";
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              per_page: 50,
+            });
+            for (const issue of issues) {
+              if (issue.title !== title) continue;
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: "Auto-closing: pending changesets cleared or Version Packages PR is open again.",
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: "closed",
+              });
+            }
