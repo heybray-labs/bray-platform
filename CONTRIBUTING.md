@@ -238,7 +238,8 @@ sections appended to a shared core) and runs it:
 - **Merge:** org branch rulesets (owner-configured) require check contexts
   **`guards / guards`** and **`verify`** to pass on PRs to `main` (check-run names, not
   the `CI / … (pull_request)` display names the PR UI shows). A tripwire that has never
-  fired in CI is not done — see `docs/guards-verification.md`.
+  fired in CI is not done — see
+  [`docs/guards-verification.md`](https://github.com/heybray-labs/bray-scenarios/blob/main/docs/guards-verification.md).
 
 ### Batched platform work (approved 6A-review policy)
 
