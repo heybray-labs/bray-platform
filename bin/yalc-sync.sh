@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build + yalc publish platform packages. See docs/dev-workflow.md (consumer repos).
+# Build + yalc publish platform packages. See docs/DEVELOPMENT.md (consumer repos).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
