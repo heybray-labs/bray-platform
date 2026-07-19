@@ -1,5 +1,15 @@
 # @heybray/gamification-react
 
+## 1.2.2
+
+### Patch Changes
+
+- a6169a8: Premium closeout: scope global leaderboard and points history by content type; disable browser fetch cache on shared apiRequest/queryFn to prevent 304 empty-body cache clobber after mutations.
+- Updated dependencies [a6169a8]
+  - @heybray/gamification@1.1.2
+  - @heybray/react@1.2.2
+  - @heybray/ui@1.2.1
+
 ## 1.2.1
 
 ### Patch Changes
