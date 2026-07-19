@@ -27,4 +27,4 @@ jobs:
           remote-organization-name: ""
           remote-repository-name: ""
           branch: "main"
-          allowlist: dependabot[bot],renovate[bot]
+          allowlist: dependabot[bot],renovate[bot],brayg
