@@ -63,6 +63,8 @@ type LeaderboardPanelProps = {
   masteryScopeToken?: string;
   /** Optional content type label for multi-domain hosts (display only). */
   contentTypeLabel?: string;
+  /** When set, global leaderboard queries include only this content type. */
+  contentTypeFilter?: string;
 };
 
 const CURRENT_USER_ROW = "font-semibold";
@@ -241,6 +243,7 @@ export function LeaderboardPanel({
   className,
   masteryScopeToken = "category",
   contentTypeLabel: _contentTypeLabel,
+  contentTypeFilter,
 }: LeaderboardPanelProps) {
   const [selection, setSelection] = useState(GLOBAL_LEADERBOARD_VALUE);
   const [period, setPeriod] = useState<"all_time" | "month">("all_time");
@@ -254,8 +257,14 @@ export function LeaderboardPanel({
   const selectedCategory = categoryOptions.find((c) => c.slug === effectiveCategory);
 
   const queryKey = useMemo(
-    () => ["/api/points/leaderboard", scopeTab, scopeTab !== "global" ? effectiveCategory : null, period],
-    [scopeTab, effectiveCategory, period],
+    () => [
+      "/api/points/leaderboard",
+      scopeTab,
+      scopeTab !== "global" ? effectiveCategory : null,
+      period,
+      scopeTab === "global" ? contentTypeFilter ?? null : null,
+    ],
+    [scopeTab, effectiveCategory, period, contentTypeFilter],
   );
 
   const { data, isLoading } = useQuery<{
@@ -270,6 +279,9 @@ export function LeaderboardPanel({
       params.set("limit", String(LEADERBOARD_LIMIT));
       if (scopeTab !== "global" && effectiveCategory) {
         params.set("category", effectiveCategory);
+      }
+      if (scopeTab === "global" && contentTypeFilter) {
+        params.set("contentType", contentTypeFilter);
       }
       return apiRequest("GET", `/api/points/leaderboard?${params.toString()}`);
     },

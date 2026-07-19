@@ -692,6 +692,7 @@ export class GamificationService {
         description: pointTransactions.description,
         createdAt: pointTransactions.createdAt,
         contentId: pointTransactions.contentId,
+        contentType: pointTransactions.contentType,
         activityId: pointTransactions.activityId,
         contentTitle: gamificationContent.title,
         tierColor: rewardTiers.color,
@@ -873,6 +874,8 @@ export class GamificationService {
     period: "all_time" | "month";
     limit?: number;
     currentUserId?: number;
+    /** When set with global scope, sums only transactions for this content type. */
+    contentType?: string;
   }): Promise<{ entries: LeaderboardEntry[]; currentUser: LeaderboardEntry | null }> {
     const safeLimit = Math.min(50, Math.max(1, options.limit ?? 20));
     const entries = await this.queryLeaderboardEntries({ ...options, limit: safeLimit });
@@ -898,10 +901,15 @@ export class GamificationService {
     period: "all_time" | "month";
     limit: number;
     currentUserId?: number;
+    contentType?: string;
   }): Promise<LeaderboardEntry[]> {
     const monthStart = sql`date_trunc('month', now())`;
     const periodFilter =
       options.period === "month" ? gte(pointTransactions.createdAt, monthStart) : undefined;
+    const contentTypeFilter =
+      options.scope === "global" && options.contentType
+        ? eq(pointTransactions.contentType, options.contentType)
+        : undefined;
 
     if (options.scope === "dimension-option") {
       if (!options.optionSlug?.trim()) {
@@ -967,7 +975,7 @@ export class GamificationService {
       })
       .from(pointTransactions)
       .innerJoin(users, eq(pointTransactions.userId, users.id))
-      .where(periodFilter)
+      .where(and(periodFilter, contentTypeFilter))
       .groupBy(pointTransactions.userId, users.firstName, users.email)
       .orderBy(desc(sql`SUM(${pointTransactions.amount})`))
       .limit(options.limit);
@@ -987,12 +995,17 @@ export class GamificationService {
     optionSlug?: string;
     period: "all_time" | "month";
     currentUserId?: number;
+    contentType?: string;
   }): Promise<LeaderboardEntry | null> {
     if (options.currentUserId == null) return null;
 
     const monthStart = sql`date_trunc('month', now())`;
     const periodFilter =
       options.period === "month" ? gte(pointTransactions.createdAt, monthStart) : undefined;
+    const contentTypeFilter =
+      options.scope === "global" && options.contentType
+        ? eq(pointTransactions.contentType, options.contentType)
+        : undefined;
 
     const userId = options.currentUserId;
 
@@ -1076,7 +1089,7 @@ export class GamificationService {
       })
       .from(pointTransactions)
       .innerJoin(users, eq(pointTransactions.userId, users.id))
-      .where(and(eq(pointTransactions.userId, userId), periodFilter))
+      .where(and(eq(pointTransactions.userId, userId), periodFilter, contentTypeFilter))
       .groupBy(users.firstName, users.email);
 
     if (!userRow || Number(userRow.points) <= 0) return null;
@@ -1087,7 +1100,9 @@ export class GamificationService {
       WITH scores AS (
         SELECT pt.user_id, SUM(pt.amount)::int AS points
         FROM point_transactions pt
-        ${options.period === "month" ? sql`WHERE pt.created_at >= date_trunc('month', now())` : sql``}
+        WHERE 1=1
+        ${options.contentType && options.scope === "global" ? sql`AND pt.content_type = ${options.contentType}` : sql``}
+        ${options.period === "month" ? sql`AND pt.created_at >= date_trunc('month', now())` : sql``}
         GROUP BY pt.user_id
       )
       SELECT

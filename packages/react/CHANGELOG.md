@@ -5,6 +5,7 @@
 ### Patch Changes
 
 - fe6463e: Disable default reconnect refetch on the shared query client (`refetchOnReconnect: false`) and stabilize `AuthProvider` context value with `useMemo`.
+- Use `cache: "no-store"` on shared `fetch` in `apiRequest` and the default queryFn so mutation refetches cannot receive empty 304 bodies that clobber optimistic cache patches.
 - Updated dependencies [537e74c]
   - @heybray/ui@1.1.0
 

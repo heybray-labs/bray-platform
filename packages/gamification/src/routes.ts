@@ -136,6 +136,13 @@ export function createGamificationRouter(
       const optionSlug =
         typeof req.query.category === "string" ? req.query.category : undefined;
       const limit = req.query.limit ? parseInt(String(req.query.limit), 10) : 20;
+      const rawContentType =
+        typeof req.query.contentType === "string" ? req.query.contentType.trim() : undefined;
+      const registeredTypes = config.contentTypes.map((c) => c.type);
+      if (rawContentType && !registeredTypes.includes(rawContentType)) {
+        res.status(400).json({ error: "Invalid contentType" });
+        return;
+      }
 
       const result = await service.getLeaderboard({
         scope: resolved.mode,
@@ -144,6 +151,7 @@ export function createGamificationRouter(
         period,
         limit,
         currentUserId: req.user!.id,
+        contentType: rawContentType || undefined,
       });
 
       res.json(result);
