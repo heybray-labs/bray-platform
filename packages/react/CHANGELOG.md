@@ -1,5 +1,11 @@
 # @heybray/react
 
+## 1.2.3
+
+### Patch Changes
+
+- bb6ebe2: Fix cover images failing to load when many authenticated media fetches run at once (shared blob cache, auth-aware loading, cache cleared on logout).
+
 ## 1.2.2
 
 ### Patch Changes
