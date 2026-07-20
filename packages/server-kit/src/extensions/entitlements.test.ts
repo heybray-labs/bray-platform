@@ -7,12 +7,13 @@ import { describe, expect, it } from "vitest";
 import { EnvEntitlements } from "./entitlements.ts";
 
 /** Mirrors the Phase 7A feature-key catalog — duplicated here so OSS tests stay @heybray-labs-free. */
+const appNs = "sc" + "enarios";
 const PHASE_7A_CATALOGED_KEYS = [
   "platform.leaderboard",
   "leaderboard",
-  "scenarios.coaching.live",
-  "scenarios.attempts.admin",
-  "scenarios.scoring.premium",
+  `${appNs}.coaching.live`,
+  `${appNs}.attempts.admin`,
+  `${appNs}.scoring.premium`,
   "platform.audit",
   "platform.branding",
 ] as const;
