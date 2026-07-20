@@ -1,5 +1,16 @@
 # @heybray/react
 
+## 1.3.0
+
+### Minor Changes
+
+- 89d2b2f: Add optional `managePermissions[]` to MainLayout/SettingsModal while keeping singular `managePermission` working.
+
+### Patch Changes
+
+- Updated dependencies [89d2b2f]
+  - @heybray/identity@1.1.0
+
 ## 1.2.4
 
 ### Patch Changes

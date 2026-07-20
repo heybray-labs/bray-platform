@@ -1,5 +1,18 @@
 # @heybray/gamification-react
 
+## 1.3.0
+
+### Minor Changes
+
+- 89d2b2f: Pass optional `contentType` through MemberProgressDrawer and star-map path helpers.
+
+### Patch Changes
+
+- Updated dependencies [89d2b2f]
+- Updated dependencies [89d2b2f]
+  - @heybray/gamification@1.2.0
+  - @heybray/react@1.3.0
+
 ## 1.2.3
 
 ### Patch Changes

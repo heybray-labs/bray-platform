@@ -1,5 +1,11 @@
 # @heybray/server-kit
 
+## 1.2.0
+
+### Minor Changes
+
+- 89d2b2f: Add `RATE_LIMIT_IP_ALLOWLIST` env parsing and skip predicate for global/auth rate limiters; OSS allow-all entitlements contract test.
+
 ## 1.1.1
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # @heybray/identity
 
+## 1.1.0
+
+### Minor Changes
+
+- 89d2b2f: Add `setManagePermissions` and plural `managePermission` input; `hasManagePermission` becomes any-of.
+
+### Patch Changes
+
+- Updated dependencies [89d2b2f]
+  - @heybray/server-kit@1.2.0
+
 ## 1.0.1
 
 ### Patch Changes
