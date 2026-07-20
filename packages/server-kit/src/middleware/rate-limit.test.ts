@@ -22,6 +22,33 @@ describe("parseRateLimitMax", () => {
   });
 });
 
+describe("parseIpAllowlist", () => {
+  it("parses comma-separated entries", async () => {
+    const { parseIpAllowlist } = await import("./rate-limit.ts");
+    expect(parseIpAllowlist("127.0.0.1, 10.0.0.0/8")).toEqual(["127.0.0.1", "10.0.0.0/8"]);
+    expect(parseIpAllowlist(undefined)).toEqual([]);
+  });
+});
+
+describe("isAllowlistedIp", () => {
+  const prevAllowlist = process.env.RATE_LIMIT_IP_ALLOWLIST;
+
+  afterEach(() => {
+    if (prevAllowlist === undefined) delete process.env.RATE_LIMIT_IP_ALLOWLIST;
+    else process.env.RATE_LIMIT_IP_ALLOWLIST = prevAllowlist;
+    vi.resetModules();
+  });
+
+  it("matches exact IPs and CIDR ranges when env is set", async () => {
+    process.env.RATE_LIMIT_IP_ALLOWLIST = "127.0.0.1,10.0.0.0/8";
+    vi.resetModules();
+    const { isAllowlistedIp } = await import("./rate-limit.ts");
+    expect(isAllowlistedIp("127.0.0.1")).toBe(true);
+    expect(isAllowlistedIp("10.1.2.3")).toBe(true);
+    expect(isAllowlistedIp("192.168.0.1")).toBe(false);
+  });
+});
+
 describe("globalRateLimiter", () => {
   const prevMax = process.env.RATE_LIMIT_MAX;
   let server: Server | undefined;

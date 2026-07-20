@@ -109,6 +109,10 @@ export class TeamStarMapService {
     private readonly config: TeamStarMapConfig,
   ) {}
 
+  private resolveContentType(override?: string): string {
+    return override ?? this.config.contentType;
+  }
+
   async getLastActiveAt(userIds: number[]): Promise<Map<number, Date | null>> {
     if (!userIds.length) return new Map();
 
@@ -308,8 +312,10 @@ export class TeamStarMapService {
     user: UserWithRole,
     teamId: number | "all",
     memberUserId: number,
+    contentTypeOverride?: string,
   ): Promise<MemberContentHistoryResponse> {
     await assertMemberTeamAccess(user, teamId, memberUserId);
+    const contentType = this.resolveContentType(contentTypeOverride);
 
     const [userRow] = await db
       .select({ firstName: users.firstName, email: users.email, teamId: users.teamId })
@@ -360,7 +366,7 @@ export class TeamStarMapService {
       .where(
         and(
           eq(gamificationContent.isActive, true),
-          eq(gamificationContent.contentType, this.config.contentType),
+          eq(gamificationContent.contentType, contentType),
           eq(classificationDimensions.slug, this.config.masteryDimensionSlug),
         ),
       );
@@ -383,7 +389,7 @@ export class TeamStarMapService {
         .where(
           and(
             eq(userContentTierAwards.userId, memberUserId),
-            eq(userContentTierAwards.contentType, this.config.contentType),
+            eq(userContentTierAwards.contentType, contentType),
             eq(gamificationContent.isActive, true),
           ),
         ),
@@ -405,7 +411,7 @@ export class TeamStarMapService {
         .where(
           and(
             eq(activityLog.userId, memberUserId),
-            eq(activityLog.contentType, this.config.contentType),
+            eq(activityLog.contentType, contentType),
             eq(gamificationContent.isActive, true),
           ),
         )

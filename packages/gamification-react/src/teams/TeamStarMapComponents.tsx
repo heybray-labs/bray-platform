@@ -66,7 +66,9 @@ type MemberProgressDrawerProps = {
   // DEPRECATED: ScenarioListRowComponent alias
   ScenarioListRowComponent?: ComponentType<ContentListRowProps>; // DEPRECATED:
   /** Build the member history endpoint. Defaults to `/content-history`. */
-  memberHistoryPath?: (teamId: number | "all", userId: number) => string;
+  memberHistoryPath?: (teamId: number | "all", userId: number, contentType?: string) => string;
+  /** Optional content type override for composed multi-app drill-in. */
+  contentType?: string;
   /** Singular content noun for headings (e.g. `deck`, `note`). */
   contentNoun?: string;
   /** Plural content noun for empty states (e.g. `decks`, `notes`). */
@@ -180,13 +182,14 @@ export function MemberProgressDrawer({
   ContentListRowComponent,
   ScenarioListRowComponent, // DEPRECATED: use ContentListRowComponent
   memberHistoryPath = memberContentHistoryPath,
+  contentType,
   contentNoun = "content",
   contentNounPlural,
 }: MemberProgressDrawerProps) {
   const RowComponent = ContentListRowComponent ?? ScenarioListRowComponent; // DEPRECATED: ScenarioListRowComponent fallback
   const pluralNoun = contentNounPlural ?? `${contentNoun}s`;
   const historyPath =
-    userId != null ? memberHistoryPath(teamId, userId) : null;
+    userId != null ? memberHistoryPath(teamId, userId, contentType) : null;
 
   const { data, isLoading } = useQuery<MemberContentHistory>({
     queryKey: historyPath ? [historyPath] : ["member-content-history", "disabled"],

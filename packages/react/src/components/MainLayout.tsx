@@ -25,9 +25,25 @@ export interface NavbarProps {
   /** Settings tabs; the (admin) gear opens the modal when provided. */
   settingsPanels?: SettingsPanel[];
   managePermission?: string;
+  managePermissions?: string[];
 }
 
-export function Navbar({ brand, actions, settingsPanels, managePermission }: NavbarProps) {
+function resolveManagePermissions(props: {
+  managePermission?: string;
+  managePermissions?: string[];
+}): string[] {
+  if (props.managePermissions?.length) return props.managePermissions;
+  if (props.managePermission) return [props.managePermission];
+  return [];
+}
+
+export function Navbar({
+  brand,
+  actions,
+  settingsPanels,
+  managePermission,
+  managePermissions,
+}: NavbarProps) {
   const { user, logout, hasRole } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const isAdmin = hasRole("admin");
@@ -39,6 +55,8 @@ export function Navbar({ brand, actions, settingsPanels, managePermission }: Nav
   const initials = initialsFromUser(user);
 
   const hasSettings = isAdmin && !!settingsPanels?.length;
+  const resolvedManagePermissions = resolveManagePermissions({ managePermission, managePermissions });
+  const hasManageGate = resolvedManagePermissions.length > 0;
 
   return (
     <nav
@@ -86,12 +104,13 @@ export function Navbar({ brand, actions, settingsPanels, managePermission }: Nav
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {hasSettings && managePermission && (
+              {hasSettings && hasManageGate && (
                 <SettingsModal
                   open={settingsOpen}
                   onOpenChange={setSettingsOpen}
                   panels={settingsPanels!}
                   managePermission={managePermission}
+                  managePermissions={managePermissions}
                 />
               )}
             </>
@@ -108,6 +127,7 @@ export function MainLayout({
   actions,
   settingsPanels,
   managePermission,
+  managePermissions,
 }: {
   children: ReactNode;
 } & NavbarProps) {
@@ -118,6 +138,7 @@ export function MainLayout({
         actions={actions}
         settingsPanels={settingsPanels}
         managePermission={managePermission}
+        managePermissions={managePermissions}
       />
       <main className="flex-1 overflow-auto">{children}</main>
     </div>

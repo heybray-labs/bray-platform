@@ -28,22 +28,32 @@ export function avatarInitials(name: string): string {
   return name.slice(0, 2).toUpperCase() || "?";
 }
 
-// The app's "manage" permission string is injected at startup via
-// setManagePermission (see server/app.ts) so this platform controller stays
-// free of any single app's permission vocabulary.
-let managePermission: string | null = null;
+// The app's "manage" permission strings are injected at startup via
+// setManagePermission / setManagePermissions (see server/app.ts) so this platform
+// controller stays free of any single app's permission vocabulary.
+let managePermissions: string[] | null = null;
 
-export function setManagePermission(permission: string): void {
-  managePermission = permission;
+function normalizeManagePermissions(permission: string | string[]): string[] {
+  return (Array.isArray(permission) ? permission : [permission]).filter(Boolean);
+}
+
+/** Accepts a single permission or an array (stored as an array internally). */
+export function setManagePermission(permission: string | string[]): void {
+  managePermissions = normalizeManagePermissions(permission);
+}
+
+export function setManagePermissions(permissions: string[]): void {
+  managePermissions = normalizeManagePermissions(permissions);
 }
 
 export function hasManagePermission(user: UserWithRole): boolean {
-  if (managePermission == null) {
+  if (managePermissions == null || managePermissions.length === 0) {
     throw new Error(
       "Team manage permission not configured; call setManagePermission() at startup.",
     );
   }
-  return user.role?.permissions?.includes(managePermission) ?? false;
+  const granted = user.role?.permissions ?? [];
+  return managePermissions.some((permission) => granted.includes(permission));
 }
 
 export async function isTeamManager(userId: number): Promise<boolean> {

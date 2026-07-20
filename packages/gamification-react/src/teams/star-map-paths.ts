@@ -4,16 +4,32 @@
  */
 
 /** Content-neutral team star map API paths (preferred for new apps). */
-export function memberContentHistoryPath(teamId: number | "all", userId: number): string {
-  return `/api/teams/${teamId}/members/${userId}/content-history`;
+function withContentTypeQuery(base: string, contentType?: string): string {
+  if (!contentType) return base;
+  return `${base}?contentType=${encodeURIComponent(contentType)}`;
+}
+
+export function memberContentHistoryPath(
+  teamId: number | "all",
+  userId: number,
+  contentType?: string,
+): string {
+  return withContentTypeQuery(
+    `/api/teams/${teamId}/members/${userId}/content-history`,
+    contentType,
+  );
 }
 
 export function memberContentAttemptsPath(
   teamId: number | "all",
   userId: number,
   contentId: number,
+  contentType?: string,
 ): string {
-  return `/api/teams/${teamId}/members/${userId}/contents/${contentId}/attempts`;
+  return withContentTypeQuery(
+    `/api/teams/${teamId}/members/${userId}/contents/${contentId}/attempts`,
+    contentType,
+  );
 }
 
 /** Legacy app-shaped paths — kept for back-compat. */

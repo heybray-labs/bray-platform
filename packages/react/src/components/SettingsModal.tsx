@@ -37,7 +37,18 @@ interface SettingsModalProps {
   onOpenChange: (open: boolean) => void;
   panels: SettingsPanel[];
   /** Permission required to see `requiresManage` panels (supplied by the app). */
-  managePermission: string;
+  managePermission?: string;
+  /** Any-of manage permissions (preferred when an app spans multiple domains). */
+  managePermissions?: string[];
+}
+
+function resolveManagePermissions(props: {
+  managePermission?: string;
+  managePermissions?: string[];
+}): string[] {
+  if (props.managePermissions?.length) return props.managePermissions;
+  if (props.managePermission) return [props.managePermission];
+  return [];
 }
 
 export function SettingsModal({
@@ -45,9 +56,12 @@ export function SettingsModal({
   onOpenChange,
   panels,
   managePermission,
+  managePermissions,
 }: SettingsModalProps) {
   const { hasPermission } = useAuth();
-  const canManage = hasPermission(managePermission);
+  const canManage = resolveManagePermissions({ managePermission, managePermissions }).some(
+    (permission) => hasPermission(permission),
+  );
   const [dirty, setDirty] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
 
