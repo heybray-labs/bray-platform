@@ -44,9 +44,8 @@ export function Navbar({
   managePermission,
   managePermissions,
 }: NavbarProps) {
-  const { user, logout, hasRole } = useAuth();
+  const { user, logout } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const isAdmin = hasRole("admin");
 
   const fullName =
     [user?.profile?.firstName, user?.profile?.lastName].filter(Boolean).join(" ") ||
@@ -54,9 +53,9 @@ export function Navbar({
     "";
   const initials = initialsFromUser(user);
 
-  const hasSettings = isAdmin && !!settingsPanels?.length;
   const resolvedManagePermissions = resolveManagePermissions({ managePermission, managePermissions });
   const hasManageGate = resolvedManagePermissions.length > 0;
+  const hasSettings = hasManageGate && !!settingsPanels?.length;
 
   return (
     <nav
@@ -104,7 +103,7 @@ export function Navbar({
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {hasSettings && hasManageGate && (
+              {hasSettings && (
                 <SettingsModal
                   open={settingsOpen}
                   onOpenChange={setSettingsOpen}
