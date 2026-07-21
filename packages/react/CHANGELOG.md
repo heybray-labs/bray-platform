@@ -1,5 +1,11 @@
 # @heybray/react
 
+## 1.3.1
+
+### Patch Changes
+
+- a41e14a: Gate the avatar Settings menu item on configured manage permissions instead of a literal `admin` role name (FL-6A4-002).
+
 ## 1.3.0
 
 ### Minor Changes
