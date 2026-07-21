@@ -34,7 +34,9 @@ export function AboutPanel({ logoSrc }: AboutPanelProps) {
     staleTime: Infinity,
   });
 
-  const version = data?.version ?? __APP_VERSION__;
+  const version =
+    data?.version ??
+    (typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "unknown");
 
   return (
     <div className="flex flex-col items-center gap-6 py-4 text-center">
