@@ -1,5 +1,11 @@
 # @heybray/react
 
+## 1.3.2
+
+### Patch Changes
+
+- b0f9720: Gate Settings modal tabs on each panel's `managePermission` / `requiresRole` instead of treating any layout manage permission as access to all admin tabs (fixes 403 when opening Settings as a single-domain manager).
+
 ## 1.3.1
 
 ### Patch Changes
