@@ -1,5 +1,11 @@
 # @heybray/server-kit
 
+## 1.2.1
+
+### Patch Changes
+
+- 859669b: Replace Phase 7A contract-test catalog strings with neutral example keys that satisfy the Scenarios vocabulary gate.
+
 ## 1.2.0
 
 ### Minor Changes
