@@ -6,22 +6,21 @@
 import { describe, expect, it } from "vitest";
 import { EnvEntitlements } from "./entitlements.ts";
 
-/** Mirrors the Phase 7A feature-key catalog — duplicated here so OSS tests stay @heybray-labs-free. */
-const appNs = "sc" + "enarios";
-const PHASE_7A_CATALOGED_KEYS = [
+/** Neutral example keys — OSS contract test must not mirror app vocabulary in platform packages. */
+const EXAMPLE_CATALOGED_KEYS = [
   "platform.leaderboard",
   "leaderboard",
-  `${appNs}.coaching.live`,
-  `${appNs}.attempts.admin`,
-  `${appNs}.scoring.premium`,
+  "exampleapp.coaching.live",
+  "exampleapp.attempts.admin",
+  "exampleapp.scoring.premium",
   "platform.audit",
   "platform.branding",
 ] as const;
 
 describe("OSS allow-all entitlements contract", () => {
-  it("EnvEntitlements allows every cataloged key with no custom provider installed", async () => {
+  it("EnvEntitlements allows every example catalog key with no custom provider installed", async () => {
     const provider = new EnvEntitlements();
-    for (const key of PHASE_7A_CATALOGED_KEYS) {
+    for (const key of EXAMPLE_CATALOGED_KEYS) {
       await expect(provider.isEnabled(key)).resolves.toBe(true);
     }
   });
