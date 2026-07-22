@@ -1,5 +1,16 @@
 # @heybray/identity
 
+## 1.2.0
+
+### Minor Changes
+
+- b6664ee: Add `authenticateTokenOrApiKey` middleware, accepting an API key (via `@heybray/server-kit`'s `ApiKeyVerifier` seam) as an alternative to a user JWT on the same `Authorization: Bearer` header. `requirePermission` now checks either the authenticated user's role permissions or the API key principal's permissions, so existing route-level authorization is unchanged for JWT-authenticated requests and works unmodified for routes that opt in to `authenticateTokenOrApiKey`.
+
+### Patch Changes
+
+- Updated dependencies [b6664ee]
+  - @heybray/server-kit@1.3.0
+
 ## 1.1.0
 
 ### Minor Changes

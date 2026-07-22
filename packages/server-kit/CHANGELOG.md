@@ -1,5 +1,11 @@
 # @heybray/server-kit
 
+## 1.3.0
+
+### Minor Changes
+
+- b6664ee: Add the `ApiKeyVerifier` extension seam (`ApiKeyPrincipal`, `API_KEY_PREFIX`, `NullApiKeyVerifier`, `setApiKeyVerifier`, `verifyApiKey`). OSS default never recognizes a key, matching the existing `EntitlementProvider`/`TenantResolver` seam pattern; an enterprise package can install a real, DB-backed verifier.
+
 ## 1.2.1
 
 ### Patch Changes
